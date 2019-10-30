@@ -1,0 +1,1 @@
+This is a buildroot environment with modifications to allow it to compile the required glibc for the Arris DG3270A cable modem. The build from here can be merged with the original firmware to produce a hybrid firmware that adds features and upgrades the software. It focuses on leaving the glibc intacted and upgrading the toolchain and support programs.
