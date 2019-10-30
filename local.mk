@@ -1,0 +1,1 @@
+GLIBC_OVERRIDE_SRCDIR = ${BR2_DL_DIR}/glibc-fedora
