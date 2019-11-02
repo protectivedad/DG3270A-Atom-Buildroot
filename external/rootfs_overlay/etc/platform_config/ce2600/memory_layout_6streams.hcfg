@@ -1,0 +1,21 @@
+// NOTE: This layout starts at the media_base_address specified in platform
+// config Entries starting with smd_buffers* and smd_frame_buffers are
+// processed by the SMD core, the name really doesn't matter other than the
+// beginning, except that each entry must have a unique name.  
+
+//name { type = <type> pmr = <pmr_identifier> size = <size> page_size = <page_size> align = <alignment>}
+
+smd_DMX_FW_IMAGE             {                     size = 0x00030000                 } // (192KB) Demux FW image
+omar_buf                     {                     size = 0x00100000 align = 0x100000} // (1MB) OMAR trace buffer, must be aligned to size
+sven_buf                     {                     size = 0x00100000 align = 0x100000} // (1MB) SVEN trace buffer, must be aligned to size
+sven_hdr                     {                     size = 0x00001000 	             } // (4KB) sven header buffer
+omar_hdr                     {                     size = 0x00001000                 } // (4KB) omar header buffer
+
+//----------------------------------
+// SMD linear buffers (90.11MB)
+// smd buffers needed to handle 6 streams:
+// 46.05 MB used by SMD components and 44.06 MB by middleware buffers (40 * 188KB * NumStreams)
+
+smd_buffers_linear           { type = "linear"     size = 0x5A1D000                } // (90.11MB) all SMD linear buffer 
+
+// TOP of layout ~= 92.3MB + the offset assigned with media_base_address

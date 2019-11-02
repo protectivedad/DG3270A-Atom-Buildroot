@@ -1,0 +1,59 @@
+#!/bin/sh
+##
+## Compatability scripts for older versions
+##
+. /etc/ath/apcfg
+cfg -e > /tmp/vars.$$
+	. /tmp/vars.$$
+	rm /tmp/vars.$$
+/etc/ath/lbd-script stop
+
+## Kill 'icm' if it is alive
+
+#ARRIS REMOVE START
+#ICM_TMP_FILE=/tmp/icm.tmp
+#
+#ps -ef > ${ICM_TMP_FILE}
+#if grep -q icm ${ICM_TMP_FILE}; then
+#    killall icm
+#fi
+#rm ${ICM_TMP_FILE}
+#ARRIS REMOVE END
+
+WPS_LED_OFF=1
+#ARRIS MOD - use correct pathname: (instead of /proc/simple_config/)
+echo $WPS_LED_OFF  > /tmp/simple_config_led
+#properly kill hostapd
+killall hostapd
+rm -rf /var/run/hostapd
+#END ARRIS MOD
+
+KER_VER_31=`set | uname -a | grep -c "2.6.31"`
+if [ "${KER_VER_31}" = 1 ]; then
+    pktlogconf -d wifi0
+    pktlogconf -d wifi1
+fi
+
+
+killVAP all
+#Finally, unload all modules
+sleep 3
+#ARRIS MOD change -eq to = to remove error when undefined
+if [ "${AP_CONF_ACFG}" = "1" ]; then
+	prepareACFG unload
+fi
+sleep 3
+/etc/rc.d/rc.wlan down
+## In peregrine environment, we are seeing random panics
+## when apup and apdown are done  quick
+## add 3 seconds delay after wlan down
+#export WAN_IF=eth0
+#export LAN_IF=eth1
+
+#ifconfig $WAN_IF up
+#ifconfig $LAN_IF up
+#/etc/rc.d/rc.network
+#/etc/rc.d/rc.bridge
+
+rm -f /tmp/.apup
+airtime cleanup

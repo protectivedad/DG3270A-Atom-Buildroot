@@ -1,0 +1,30 @@
+#! /bin/sh
+
+# Invocation:    .  init_docsis_comply  $current_script_name
+
+# This file is _not_ a predicate.  It _exits_ (with a warning) if
+# DOCSIS compliance is applicable.
+
+parent_script="unspecified startup script";
+if [ 0 != $# ]; then
+    if [ "X" != "X$1" ]; then
+        # Number of arguments is non-zero.
+        parent_script="$1";
+    fi;
+fi;
+
+parent_script="$parent_script"": ";
+
+if [ -x /scripts/is_gateway ]; then
+    if /scripts/is_gateway; then
+        if [ ! -f "/nvram/sdk/docsis_relax" ]; then
+            message="${parent_script}is being skipped.";
+            message="$message  Precluded by DOCSIS compliance.";
+            echo "$message";
+            # Note that this is a successful exit as we are not
+            # _supposed_ to do anything.
+            exit 0;
+        fi;
+    fi;
+fi;
+
