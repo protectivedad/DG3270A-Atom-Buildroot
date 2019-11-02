@@ -1,0 +1,158 @@
+platform
+{
+    startup
+    {
+        {
+            action      "load"
+            filename    "/etc/platform_config/common.hcfg"
+        }
+        {
+            action      "load"
+            filename    "/etc/platform_config/ce2600/local_tweaks.hcfg"
+        }
+    }
+
+    memory { media_base_address =  0x7400000 /* 116 Megabytes */ }
+    power
+    {
+      ////////////////////////////////////////////////////////////////////////////////////
+      // GPIO can be used to power OFF/ON Smart Card Interface.
+      // If the platform is configured to use GPIO to enable / disable SC, 
+      // then uncomment the below GPIO and polarity lines and assign appropriate values. 
+
+      // ------ PLATFORM BASED GPIO ALLOCATION FOR SC POWER MANAGEMENT ------
+      // GOLDER SPRING BOARD REVISION 3  GPIO NUMBER 36  POLARITY 0 (1-Enable 0-Disable)
+      
+      //smart_card_power_gpio = 
+      //smart_card_power_gpio_polarity = 
+      ////////////////////////////////////////////////////////////////////////////////////
+      // GPIO can be used to power OFF/ON External Tuner.
+      // If the platform is configured to use GPIO to enable / disable External Tuner, 
+      // then uncomment the below GPIO and polarity lines and assign appropriate values. 
+
+      // ------ PLATFORM BASED GPIO ALLOCATION FOR External Tuner POWER MANAGEMENT ------
+      // GOLDER SPRING BOARD REVISION 3  GPIO NUMBER 36  POLARITY 1 (0-Enable 1-Disable)
+      
+      //external_tuner_power_gpio = 
+      //external_tuner_power_gpio_polarity = 
+      ////////////////////////////////////////////////////////////////////////////////////      
+      // GPIO can be used to power OFF/ON GbE.
+      // If the platform is configured to use GPIO to enable / disable GbE, 
+      // then uncomment the below GPIO and polarity lines and assign appropriate values. 
+
+      // ------ PLATFORM BASED GPIO ALLOCATION FOR GbE POWER MANAGEMENT ------
+      // GOLDER SPRING BOARD REVISION 3  GPIO NUMBER 25  POLARITY 0 (1-Enable 0-Disable)
+      
+      //gbe_power_gpio = 
+      //gbe_power_gpio_polarity = 
+      ////////////////////////////////////////////////////////////////////////////////////      
+      
+    }
+
+    software
+    {
+        drivers
+        {
+            smd
+            {
+                clock
+                {
+                    clock_properties 
+                    {
+                      // Note: There is no external vcxo on the CE2600. This
+                      // entry is simply to satisfy a reference from the clock
+                      // recovery component. It may be removed in the future.
+                      master_clock_source = 7 // EXTERNAL_VCXO = 0, MASTER_DDS = 1, INTERNAL_VCXO = 7
+                      default_clock_domain = 1  // Audio = 0,  Video = 1,  Local = 2  
+                    }
+                }
+                demux
+                {
+                  // Note: CE2600 has the OpenCable MPTS clock inverted by default.
+                  // This config can be used to disable the internal clock inversion 
+                  // if required (i.e: external inverter).
+                  tsi_open_cable_clk_inv_disable = 0 // Disable Clock Inversion = 1, Enable Clock Inversion = 0
+                }
+                firmware
+                {
+                    demux_fw     { filename = "/lib/firmware/smd/tsd_fw_ver3_1.bin"             location = "smd_DMX_FW_IMAGE" size = 0 }
+                    demux_fw_kl2 { filename = "/lib/firmware/smd/tsd_fw_ver3_1_kl2.bin"         location = "smd_DMX_FW_IMAGE" size = 0 }
+                }
+                //section added to support secure FW load
+                sgnd_firmware 
+                {
+                    demux_fw     { filename = "/lib/firmware/smd/tsd_fw_ver3_1_signed.bin"      location = "smd_DMX_FW_IMAGE" size = 0 }
+                    demux_fw_kl2 { filename = "/lib/firmware/smd/tsd_fw_ver3_1_kl2_signed.bin"  location = "smd_DMX_FW_IMAGE" size = 0 }
+                }
+                // This section is used only if the PID Remapper driver is present.
+                pid_remapper
+                {
+                    // Level of messages to print.
+                    // Remapper driver sends this messages to the console.
+                    //  0: fatal errors
+                    //  1: all possible errors and warnings
+                    //  2: errors, warnings, most debug messages
+                    //  3+: everything and the kitchen sink
+
+                    debug_level = 1
+
+                    // Whether(1) or not(0) to throttle messages sent to the
+                    // console to prevent flooding when repeated errors are
+                    // encountered.  Does not affect messages sent to SVEN.
+
+                    console_flood_prevention = 1 
+
+                    // Enable different types of sven messages
+                    //   0: silent
+                    //   1: Error / Critical Conditions / API
+                    //   2: Data flow
+                    //   3: Generic Debug
+                    //   4: Function enter/exit
+                    // Default : 12
+                    //
+                    // E.g.:
+                    //  Enable Error + Function enter/exit: sven_log_level=14
+                    //  Enable all events:                  sven_log_level=1234
+                    //  Enable just data flow:              sven_log_level=2
+                    //  Disable all sven messages:          sven_log_level=0
+
+                    sven_log_level = 12
+
+                    // TSI Map.
+                    // Used by the PID Remapper Driver to figure out
+                    // how a specific TSI (as seen by applications) links to
+                    // tuners, demodulators and the real HW TSI.
+                    // Note: the tsiN -> hw_tsi map must be consistent with
+                    // the 'mux_mode' entry described bellow.
+
+                    tsi_map
+                    {
+                       tsi0 {tuner_id = 0 demod_id = 0 hw_tsi = 2}
+                       tsi1 {tuner_id = 0 demod_id = 1 hw_tsi = 2}
+                       tsi2 {tuner_id = 0 demod_id = 2 hw_tsi = 3}
+                       tsi3 {tuner_id = 0 demod_id = 3 hw_tsi = 3}
+                       tsi4 {tuner_id = 0 demod_id = 4 hw_tsi = 4}
+                       tsi5 {tuner_id = 0 demod_id = 5 hw_tsi = 4}
+                       tsi6 {tuner_id = 0 demod_id = 6 hw_tsi = 5}
+                       tsi7 {tuner_id = 0 demod_id = 7 hw_tsi = 5}
+                    }
+
+                    // TSI mux mode.
+                    //   0: No Mux ( 1 TSI to 1 TSI)
+                    //   1: Mux 2 TSI to 1 TSI
+                    //   2: Mux 4 TSI to 1 TSI
+
+                    mux_mode = 1
+                }
+                transcoder
+                {
+                  // IP address of the external transcoder server, this must be
+                  // updated based on each specific device, default address
+                  // won't work unless there is a transcoder server running on
+                  // a media SOC in the same box along with the CE2600.
+                  server_ip = "127.0.0.1"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,144 @@
+#!/bin/sh
+
+#
+#  This file is provided under a dual BSD/GPLv2 license.  When using or 
+#  redistributing this file, you may do so under either license.
+#
+#  GPL LICENSE SUMMARY
+#
+#  Copyright(c) 2008-2011 Intel Corporation. All rights reserved.
+#
+#  This program is free software; you can redistribute it and/or modify 
+#  it under the terms of version 2 of the GNU General Public License as
+#  published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful, but 
+#  WITHOUT ANY WARRANTY; without even the implied warranty of 
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+#  General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License 
+#  along with this program; if not, write to the Free Software 
+#  Foundation, Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+#  The full GNU General Public License is included in this distribution 
+#  in the file called LICENSE.GPL.
+#
+#  Contact Information:
+#  intel.com
+#  Intel Corporation
+#  2200 Mission College Blvd.
+#  Santa Clara, CA  95052
+#  USA
+#  (408) 765-8080
+#
+#
+#  BSD LICENSE 
+#
+#  Copyright(c) 2008-2011 Intel Corporation. All rights reserved.
+#  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without 
+#  modification, are permitted provided that the following conditions 
+#  are met:
+#
+#    * Redistributions of source code must retain the above copyright 
+#      notice, this list of conditions and the following disclaimer.
+#    * Redistributions in binary form must reproduce the above copyright 
+#      notice, this list of conditions and the following disclaimer in 
+#      the documentation and/or other materials provided with the 
+#      distribution.
+#    * Neither the name of Intel Corporation nor the names of its 
+#      contributors may be used to endorse or promote products derived 
+#      from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+#  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+#  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+#  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+#  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+#  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+
+. /etc/init.d/init_utilities
+# ARRIS ADD START
+partition_if_not_partioned(){      
+    PLATFORM_NAME=`get_board_info_utility BOARD_TYPE 2>/dev/null`    
+    if  [ $PLATFORM_NAME == "CE2600_BOARD_HPMG" ] ; then
+            echo "board is hpmg making sure hard disk is partitoned"            
+            partioned=`fdisk -l | grep sda3  `
+            if [  ! -z "$partioned" ]; then          
+                    echo "disk already partioned "
+            else
+                    echo "Partioning the hard drive "
+                    diskFound=`fdisk -l | grep Disk | grep sda | cut -d " " -f3`
+                    # Install modules, make device nodes, start daemons here
+                    if [ -n "$diskFound" ] ; then
+                        diskSize=`echo $diskFound | cut -d "." -f1`
+                        if [ $diskSize -eq 500 ] ; then
+                				echo "diskFound:Repair sfdisk for disksize 500" "0041" 
+                				sfdisk /dev/sda < /etc/diskA.part --force
+                			elif [ $diskSize -eq 1000 ] ; then
+                				echo  "diskFound:Repair sfdisk for disksize 1000" "0042" 
+                				sfdisk /dev/sda < /etc/diskB.part --force
+                        fi 
+                        echo  "Formatting the hard drive" 
+                       mkfs.xfs -f -b size=4096 -d agcount=4 -s size=4096 -l size=2m -r extsize=4m,rtdev=/dev/sda1 /dev/sda2
+                        mkfs.ext3 /dev/sda3
+                        mkfs.ext3 /dev/sda5
+                        mkfs.ext3 /dev/sda6
+                        mkfs.ext3 /dev/sda7      
+                    fi      
+            fi
+      fi
+}
+#ARRIS ADD END
+start_function() {
+    # Install System Utils
+    try_command insmod /lib/modules/system_utils_linux.ko
+   
+   #ARRIS ADD START
+    partition_if_not_partioned
+   #ARRIS ADD END
+
+
+    # initialize memory controller arbitration to favor vidcap/graphics
+    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+    case "$SOC_NAME" in
+        "SOC_NAME_CE4100")
+            try_command /bin/mcu_config 0 2 -1 -1
+            ;;
+        "SOC_NAME_CE4200")
+            try_command /bin/mcu_config 0 2 -1 -1
+            ;;
+    esac
+}
+
+stop_function() {
+    # Remove System Utils
+    rmmod system_utils_linux
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac

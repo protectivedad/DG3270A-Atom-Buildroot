@@ -1,0 +1,11 @@
+platform
+{
+    memory.layout.smd_DMX_FW_IMAGE {         size = 0x00030000                 } // (192KB) Demux FW image
+    software.drivers.smd
+    {
+        firmware.demux_fw_dss { filename = "/lib/firmware/smd/tsd_fw_ver3_1_dss.bin" location = "smd_DMX_FW_IMAGE" size = 0 }
+        firmware.demux_fw { filename = "/lib/firmware/smd/tsd_fw_ver3_1.bin" location = "smd_DMX_FW_IMAGE" size = 0 }
+        sgnd_firmware.demux_fw { filename = "/lib/firmware/smd/tsd_fw_ver3_1_signed.bin" location = "smd_DMX_FW_IMAGE" size = 0 }
+        sgnd_firmware.demux_fw_dss { filename = "/lib/firmware/smd/tsd_fw_ver3_1_dss_signed.bin" location = "smd_DMX_FW_IMAGE" size = 0 }
+    }
+}

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+
+. /etc/init.d/init_utilities
+
+start_function() {
+	# Wait for br0 to come up
+	br0Configured=$(ifconfig br0 | grep HWaddr)
+	while [[ -z "$br0Configured" ]]
+	do
+		sleep 1
+		br0Configured=$(ifconfig br0 | grep HWaddr)
+	done
+	ifconfig br0:0
+	udhcpc -i br0:0
+
+	try_command dropbear -E -r /etc/dropbear_rsa_key
+}
+
+stop_function() {
+	# Terminate daemons, remove modules, remove device nodes here
+	DROPBEAR_PID=`cat /var/run/dropbear.pid`
+	if [[ "x$DROPBEAR_PID" == "x" ]]; then 
+		echo "dropbear not running; cannot kill"
+	else
+		kill $DROPBEAR_PID
+	fi
+}
+
+case $1 in
+	"start")
+		start_function
+	;;
+	"stop")
+		stop_function
+	;;
+	"restart")
+		stop_function
+		start_function
+	;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+esac

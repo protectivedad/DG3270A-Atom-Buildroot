@@ -1,0 +1,714 @@
+#!/bin/sh
+##################################################################################
+## airtime
+##
+## continuation of the apup shell script to configure 
+## atf/atm with the appropriate iwpriv/iwconfig commands
+## It is intended to be sourced from apup
+##
+
+##################################################################################
+## atf_lock
+##
+## Use flock for mutually excluding usage of this script
+##
+atf_lock() {
+   # lock file:
+   exec 150>>/tmp/.last_apup
+   flock 150
+}
+
+##################################################################################
+## atf_unlock
+##
+## Use to unlock the file lock
+## Necessary for forked a background process which should not be holding the lock
+atf_unlock() {
+   flock -u 150
+}
+
+##################################################################################
+## atf_snap_env
+##
+## Bring in the environment variables snapshot from last apup
+##
+atf_snap_env() {
+
+    # fast_down.sh could have removed this file.  In which case, abort here.
+    if [ ! -f /tmp/.last_apup ]; then
+        echo "AP disabled - Active settings not found"
+        exit 126; 
+    fi
+
+    if [ ${1:-""} != "no_lock" ]; then
+        atf_lock
+    fi
+
+    if [ `grep -c "# apup - in progress" /tmp/.last_apup` -ne 0 ]; then
+        echo "apup still in progress"
+        exit 126;
+    fi 
+
+    . /tmp/.last_apup
+    # Bring in other non-CFG apcfg parameters
+    my_vaps="'' _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16"
+    CUR_RADIO_ID=3
+}
+
+##################################################################################
+## atf_apcfg_env
+##
+## Bring in the default environment variables from apcfg
+##
+atf_apcfg_env() {
+    atf_lock
+    if [ -e /tmp/.apcfg ]; then
+        cfg -e > /tmp/vars.$$
+        . /tmp/vars.$$
+        rm /tmp/vars.$$
+    fi
+}
+
+
+##################################################################################
+## atf_cleanup
+##
+## destroy atf timers and remove .last_apup
+##
+atf_cleanup() {
+    local i=""
+
+    # destroy all previously running atf timers:
+    for i in `ls /tmp/.atf_time_stop.* 2> /dev/null`; do
+        kill -9 `cat ${i} | cut -d';' -f1`
+        rm -f ${i}
+    done
+    rm -f /tmp/.last_apup
+}
+
+##################################################################################
+## atf_start_apup
+##
+## Meant to be called in the beginning of apup
+##
+atf_start_apup() {
+
+    # Start from a clean state
+    atf_cleanup
+
+    # Save snapshot of this apup's settings:
+    # For reference in dynamic usage of sta_time
+    if [ -e /tmp/.apcfg ]; then
+        cfg -e > /tmp/.last_apup
+    fi
+
+    echo "# apup - in progress" >> /tmp/.last_apup
+}
+
+##################################################################################
+## atf_end_apup
+##
+## Meant to be called in the end of apup.
+## Used to avoid atf calls in between
+##
+atf_end_apup() {
+
+    # Remove the "in progress" line
+    sed -i "s/# apup - in progress//g" /tmp/.last_apup
+}
+
+##################################################################################
+## iterate_configure_radio
+##
+## This function iterates through each active VAP (on specified radio) and executes
+## the given command.
+## It is primarily used for ATF, but it is generic enough to be used for any command.
+##
+## Options to pass in: "${IN_COMMAND}" "radio|_2" "per_radio|vap" "SSID|GROUP|none"
+##
+## Example Usage:
+##    IN_COMMAND='wlanconfig ath${VAP_NUM} showatftable'
+##    iterate_configure_radio "${IN_COMMAND}" "radio_2" "per_radio" "none"
+##
+iterate_configure_radio() {
+
+    local TARGET_RADIO=0
+    local ITER_TYPE=${3:-per_radio}
+    local CMD_TYPE=${4:-none}
+    local GROUP_NAME="g_ath"
+
+    if [ "${2:-radio_2}" = "radio_2" ]; then
+        TARGET_RADIO=1
+    fi
+
+    VAP_NUM=-1
+
+    for i in $my_vaps
+    do
+        VAP_NUM=$((VAP_NUM+1))
+        eval i=${i}
+        ITER_AP_ENABLE="AP_ENABLE${i}"
+        ITER_SSID="AP_SSID${i}"
+        ITER_RADIO_ID="AP_RADIO_ID${i}"
+        ITER_BSSWEIGHT="AP_BSSWEIGHT${i}"
+        eval ITER_BSSWEIGHT=\${$ITER_BSSWEIGHT:=0}
+        eval ITER_AP_ENABLE=\${$ITER_AP_ENABLE:=0}
+        eval ITER_SSID=\$$ITER_SSID
+        eval ITER_RADIO_ID=\${$ITER_RADIO_ID:=0}
+
+        # Skip VAP if not for this radio -
+        if [ "${ITER_RADIO_ID}" != "${TARGET_RADIO}" ]; then
+            continue;
+        fi
+
+        # For future apup <radio> support:
+        if [ "${ITER_RADIO_ID}" != "${CUR_RADIO_ID}" -a "${CUR_RADIO_ID}" != "3" ]; then
+            continue;
+        fi
+
+        # Skip VAP if not enabled -
+        if [ "${ITER_AP_ENABLE}" != "1" ]; then
+            continue;
+        fi
+
+        # Handle the third input option (SSID|GROUP|none):
+        if [ "${CMD_TYPE}" = "SSID" -a "${ITER_BSSWEIGHT}" -eq "0" ]; then 
+            continue;
+        elif [ "${CMD_TYPE}" = "GROUP" ]; then
+            GROUP_NAME="g_ath${VAP_NUM}"
+            if [ "${ITER_BSSWEIGHT}" -eq "0" ]; then
+                continue;
+            fi
+        fi
+
+        ########## Parse the input command ################
+        local COMMAND="" y="" NEW=""
+        for y in $1
+        do
+            eval NEW=$y
+            COMMAND="${COMMAND} "${NEW}
+        done
+
+        ########## Execute the command ####################
+        echo "$COMMAND"
+        eval $COMMAND
+
+        if [ "${ITER_TYPE}" = "per_radio" ]; then
+            break
+        fi
+
+    done    
+}
+
+##################################################################################
+## configure_atf_stations
+##
+## This function sets all STATION weighting found in CFG for specified radio.
+## CFG ATF_STA_MAC_${j} are expected to have no Colons.
+##
+## Options to pass in: "radio|_2 - target radio"
+## Example Usage:
+##    configure_atf_stations radio_2
+##
+configure_atf_stations() {
+    local j=0
+
+    #Will explicitly NOT setup a STATION with MAC 000000000000.
+    #Will explicitly NOT setup a STATION with WEIGHT set to 0 (Depends on flushatftable to clear the station's previous weighting)
+    #MAC Address Format is with no colons just like the QCA wlanconfig athx addsta command desires
+
+    while true; do
+      j=$((j+1))
+      ITER_ATF_STA_MAC="ATF_STA_MAC_${j}"
+      ITER_ATF_STA_WEIGHT="ATF_STA_WEIGHT_${j}"
+      eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+      eval ITER_ATF_STA_WEIGHT=\${$ITER_ATF_STA_WEIGHT:=0}
+
+      # Terminating conditions
+      if [    "${ITER_ATF_STA_MAC}" = "" ]; then
+          break
+      fi
+      # Skip these STA configurations:
+      if [    "${ITER_ATF_STA_MAC}"    = "000000000000" \
+           -o "${ITER_ATF_STA_WEIGHT}" = "0" ]; then
+          continue
+      fi
+      IN_COMMAND='wlanconfig ath${VAP_NUM} addsta "${ITER_ATF_STA_MAC}" "${ITER_ATF_STA_WEIGHT}"'
+      iterate_configure_radio "${IN_COMMAND}" "${1:-radio_2}" "per_vap" "none"
+
+    done
+}
+
+
+##################################################################################
+## atf_add_sta
+##
+## This function manages the ATF STA CFG parameters, in order to add a STA
+## If existing STA matches MAC address, this function is used to modify STA Weight
+##
+## Inputs: "STA MAC Address (no colons)" "STA Weight"
+## Example Usage (command line):
+##     airtime add_sta "9068c34c7c62" "30"
+##
+atf_add_sta() {
+
+    local MATCH=0
+    local j=0
+
+    # Find the next available slot:
+    while true; do
+      j=$((j+1))
+      ITER_ATF_STA_MAC="ATF_STA_MAC_${j}"
+      eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+
+      # Terminating condition:
+      if [ "${ITER_ATF_STA_MAC}" = "" ]; then
+          break
+      fi
+      # Found a matching STA
+      if [ "${ITER_ATF_STA_MAC}" = "${1}" ]; then
+          MATCH=1
+          break
+      fi
+    done
+
+    # No match found. Create STA:
+    if [ "${MATCH}" -eq "0" ]; then
+        cfg -a ATF_STA_MAC_${j}="${1}"
+    fi
+    cfg -a ATF_STA_WEIGHT_${j}="${2}"
+}
+
+##################################################################################
+## atf_del_sta
+##
+## This function manages the ATF STA CFG parameters, in order to del a STA
+##
+## Inputs: "STA MAC Address (no colons)"
+## Example Usage (command line):
+##     airtime del_sta "9068c34c7c62"
+##
+atf_del_sta() {
+    local MATCH="" j=0
+
+    # Find the matching sta's:
+    while true; do
+      j=$((j+1))
+      ITER_ATF_STA_MAC="ATF_STA_MAC_${j}"
+      eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+
+      # Terminating condition:
+      if [ "${ITER_ATF_STA_MAC}" = "" ]; then
+          break
+      fi
+      # Found a matching STA
+      if [ "${ITER_ATF_STA_MAC}" = "${1}" ]; then
+          MATCH="${j} ${MATCH}"
+          # Note - don't break here - so ${j} turns ends in num_sta
+      fi
+    done
+
+    # clean up STA list
+    local num_sta=${j}
+    local x=0 y=0 y_plus=0
+
+    for x in ${MATCH}; do
+        for y in `seq ${x} ${num_sta}`; do
+            y_plus=$((y+1))
+
+            # Terminating condition:
+            if [ "${y_plus}" -gt "${num_sta}" ]; then
+                num_sta=$((num_sta-1))
+                break
+            fi
+
+            ITER_ATF_STA_MAC="ATF_STA_MAC_${y_plus}"
+            ITER_ATF_STA_WEIGHT="ATF_STA_WEIGHT_${y_plus}"
+            eval ITER_ATF_STA_MAC=\${$ITER_ATF_STA_MAC}
+            eval ITER_ATF_STA_WEIGHT=\${$ITER_ATF_STA_WEIGHT}
+
+            cfg -a ATF_STA_MAC_${y}="${ITER_ATF_STA_MAC}"
+            cfg -a ATF_STA_WEIGHT_${y}="${ITER_ATF_STA_WEIGHT}"
+            eval ATF_STA_MAC_${y}=${ITER_ATF_STA_MAC}
+            eval ATF_STA_WEIGHT_${y}=${ITER_ATF_STA_WEIGHT}
+        done
+    done
+}
+
+##################################################################################
+## atf_del_all_sta
+##
+## This function deletes all the ATF STA CFG parameters
+##
+## Inputs: "(none)"
+## Example Usage (command line):
+##     airtime del_all_sta
+##
+atf_del_all_sta() {
+    local j=0
+
+    while true; do
+      j=$((j+1))
+      ITER_ATF_STA_MAC="ATF_STA_MAC_${j}"
+      eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+
+      # Terminating condition:
+      if [ "${ITER_ATF_STA_MAC}" = "" ]; then
+          break
+      fi
+      # Found a STA - need to delete it:
+      cfg -a ATF_STA_MAC_${j}=""
+      cfg -a ATF_STA_WEIGHT_${j}=""
+    done
+}
+
+##################################################################################
+## atf_sta_count
+##
+## This function returns the number of ATF STA CFG parameters
+##
+## Inputs: "(none)"
+## Example Usage (command line):
+##     airtime sta_count
+##
+atf_sta_count() {
+    local j=0
+    while true; do
+      j=$((j+1))
+      ITER_ATF_STA_MAC="ATF_STA_MAC_${j}"
+      eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+      # Terminating condition:
+      if [ "${ITER_ATF_STA_MAC}" = "" ]; then
+          break
+      fi
+    done
+    echo "$((j-1))"
+}
+
+##################################################################################
+## atf_sta_time
+##
+## This function dynamically updates the ATF running configurations
+## without a full call to apup
+##
+## Inputs: <sta_index> <seconds>
+## Example Usage (command line):
+##     airtime sta_time <sta_index> <seconds>
+##
+atf_sta_time() {
+    local in_index=${1} in_time=${2}
+
+    # 1- find mac of given index (must have been defined in last_apup):
+    ITER_ATF_STA_MAC="ATF_STA_MAC_${in_index}"
+    eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+
+    if [ "${ITER_ATF_STA_MAC}" = "" ]; then
+        echo "atf_sta_time - ATF_STA_MAC_${in_index} not found in last apup"
+        exit 1
+    fi
+
+    # 2- Input validation
+    ##  a- Make sure non-zero time
+    if [ "${in_time}" -le "0" ]; then
+        echo "atf_sta_time - invalid input time"
+        return
+    fi
+    ##  b- Make sure MAC index didn't change (since we're looking at latest vs active)
+    local LATEST_ATF_STA_MAC=`grep ATF_STA_MAC_${in_index}= /tmp/.apcfg | cut -d'=' -f 2`
+    if [ "${ITER_ATF_STA_MAC}" != "${LATEST_ATF_STA_MAC}" ]; then
+        echo "atf_sta_time - macs under given index changed"
+        exit 1
+    fi
+
+    # Log output of atf_sta_time_helper (it handles 3 and 4)
+    local LATEST_ATF_STA_WEIGHT=`grep ATF_STA_WEIGHT_${in_index}= /tmp/.apcfg | cut -d'=' -f 2`
+    wps_gpio delay_log 0 "airtime sta_time_helper ${ITER_ATF_STA_MAC} ${LATEST_ATF_STA_WEIGHT} ${in_time} ${in_index}"
+
+    # 5- kill previous processes trying to configure the same mac:
+    if [ -f /tmp/.atf_time_stop.${ITER_ATF_STA_MAC} ]; then
+        kill `cat /tmp/.atf_time_stop.${ITER_ATF_STA_MAC} | cut -d';' -f1`
+    fi
+
+    # 6- kick off timed configuration of this mac (if needed)
+    if [ ${LATEST_ATF_STA_WEIGHT} -ne "0" ]; then
+        atf_unlock
+        wps_gpio delay_log ${in_time} "airtime sta_time_stop ${ITER_ATF_STA_MAC}" &
+        echo "$!;${in_time};`date +%s`" > /tmp/.atf_time_stop.${ITER_ATF_STA_MAC}
+    fi
+    echo "success"
+}
+
+
+##################################################################################
+## atf_sta_time_helper
+##
+## This function is part 2 of atf_sta_time.
+## It is used as a helper to log the output coherently in /nvram/wlanlog
+## Output can be ignored - error checking was done in part 1.
+##
+## Inputs: <sta_mac> <seconds> <j>
+## Example Usage (command line):
+##     airtime sta_time_helper <sta_mac> <seconds> <j>
+##
+atf_sta_time_helper() {
+    local in_mac=${1} LATEST_ATF_STA_WEIGHT=${2} in_time=${3} in_index=${4}
+
+    echo "atf_sta_time - setting timer for ${in_mac} - ${in_time} seconds"
+
+    # 3- See if latest weight is different from active weight
+    ITER_ATF_STA_WEIGHT="ATF_STA_WEIGHT_${in_index}"
+    eval ITER_ATF_STA_WEIGHT=\${$ITER_ATF_STA_WEIGHT}
+    if [ "${ITER_ATF_STA_WEIGHT}" -ne "${LATEST_ATF_STA_WEIGHT}" ]; then
+        # Apply the new weights
+        eval "ATF_STA_WEIGHT_${in_index}=${LATEST_ATF_STA_WEIGHT}"
+        atf_main
+        # update the last_apup with our changes:
+        sed -i "s/ATF_STA_WEIGHT_${in_index}=.*/ATF_STA_WEIGHT_${in_index}=${LATEST_ATF_STA_WEIGHT}/g" /tmp/.last_apup            
+    fi
+
+    # 4- check if timer is needed - based on new weight:
+    if [ ${LATEST_ATF_STA_WEIGHT} -eq "0" ]; then
+        echo "No need to start timer - ${in_mac} is currently 0"
+    fi
+
+}
+
+
+##################################################################################
+## atf_sta_time_stop
+##
+## This function dynamically updates the ATF running configurations 
+## without a full call to apup
+##
+## Inputs: "<sta_mac>"
+## Example Usage (command line):
+##     airtime sta_time_stop <sta_mac>
+##
+atf_sta_time_stop() {
+    local in_mac=${1}
+    echo "atf_sta_time_stop - time expired for ${in_mac}"
+    rm -f /tmp/.atf_time_stop.${in_mac}
+
+    # 1- find index of given mac (must have been defined in last_apup):
+    local j=0
+    while true; do
+      j=$((j+1))
+      ITER_ATF_STA_MAC="ATF_STA_MAC_${j}"
+      eval ITER_ATF_STA_MAC=\$$ITER_ATF_STA_MAC
+
+      # Terminating condition:
+      if [ "${ITER_ATF_STA_MAC}" = "" ]; then
+          echo "atf_sta_time_stop - MAC ${in_mac} not found in last apup"
+          return
+      fi
+      # Found a matching STA
+      if [ "${ITER_ATF_STA_MAC}" = "${in_mac}" ]; then
+          break
+      fi
+    done
+
+    # 2- See if weight of 0 is different from active weight
+    #    (not necessary, but doesn't hurt)
+    ITER_ATF_STA_WEIGHT="ATF_STA_WEIGHT_${j}"
+    eval ITER_ATF_STA_WEIGHT=\${$ITER_ATF_STA_WEIGHT}
+    if [ "${ITER_ATF_STA_WEIGHT}" -eq "0" ]; then
+        echo "No need to apply the weights - already 0"
+        return
+    fi
+
+    # 3- Apply the new weights
+    eval "ATF_STA_WEIGHT_${j}=0"
+    atf_main
+    # update the last_apup with our changes:
+    sed -i "s/ATF_STA_WEIGHT_${j}=.*/ATF_STA_WEIGHT_${j}=0/g" /tmp/.last_apup
+    # update the MIBs with our changes:
+    cfg -a ATF_STA_WEIGHT_${j}="0"
+}
+
+##################################################################################
+## atf_get_sta_time
+##
+## This function dynamically updates the ATF remaining STA time
+##
+## Inputs: "<sta_index>"
+## Example Usage (command line):
+##     airtime get_sta_time <sta_index>
+##
+atf_get_sta_time() {
+    local in_index=${1}
+
+    # Get MAC out of in_index (looking at current cfg not, the active)
+    local in_mac=`grep ATF_STA_MAC_${in_index}= /tmp/.apcfg | cut -d'=' -f 2`
+    if [ "${in_mac}" == "" ]; then
+        echo "0 - no mac found for given index"
+        return
+    fi
+
+    # Check for file existence
+    if [ ! -f /tmp/.atf_time_stop.${in_mac} ]; then
+        echo "0"
+        return
+    fi
+
+    # File exists - calculate remaining time:
+    local total_time=`cat /tmp/.atf_time_stop.${in_mac} | cut -d';' -f2`
+    local start_time=`cat /tmp/.atf_time_stop.${in_mac} | cut -d';' -f3`
+    local curnt_time=`date +%s`
+    local remain_time=$((total_time-$((curnt_time-start_time))))
+
+    echo "${remain_time}"
+}
+
+
+##################################################################################
+#######  Main ####################################################################
+##################################################################################
+atf_main() {
+
+    ATF_ADVANCED=$((${ATF_ALGO_TYPE:=0} + ${ATF_ALGO_TYPE_2:=0}))
+    if [ ${ATF_ADVANCED} -ne 0 ]; then
+        ATF_TYPE="(Adv) "
+    fi
+
+    # Handle one radio at a time:
+    local my_radios="_2 ''"
+    for r in $my_radios
+    do
+        eval r=${r}
+        ITER_AP_ENABLE_ATF="AP_ENABLE_ATF${r}"
+        ITER_ATF_ALGO_TYPE="ATF_ALGO_TYPE${r}"
+        ITER_ATF_DISTRO_TYPE="ATF_DISTRO_TYPE${r}"
+        ITER_ATF_BSS_WEIGHT_EN="ATF_BSS_WEIGHT_EN${r}"
+        ITER_ATF_STA_WEIGHT_EN="ATF_STA_WEIGHT_EN${r}"
+        ITER_ATF_TRAFFIC_DIR="ATF_TRAFFIC_DIR${r}"
+        ITER_ATF_APP_EN="ATF_APP_EN${r}"
+        eval ITER_AP_ENABLE_ATF=\${$ITER_AP_ENABLE_ATF:=${AP_ENABLE_ATF}}
+        eval ITER_ATF_ALGO_TYPE=\${$ITER_ATF_ALGO_TYPE:=0}
+        eval ITER_ATF_DISTRO_TYPE=\${$ITER_ATF_DISTRO_TYPE:=0}
+        eval ITER_ATF_BSS_WEIGHT_EN=\${$ITER_ATF_BSS_WEIGHT_EN:=0}
+        eval ITER_ATF_STA_WEIGHT_EN=\${$ITER_ATF_STA_WEIGHT_EN:=0}
+        eval ITER_ATF_TRAFFIC_DIR=\${$ITER_ATF_TRAFFIC_DIR:=1}
+        eval ITER_ATF_APP_EN=\${$ITER_ATF_APP_EN:=0}
+
+        echo "================= START ATF radio${r} ${ATF_TYPE}==========================="
+
+        ### Initialize - for consistent starting point (and to clear old settings if disabling ATF)
+        IN_COMMAND='wlanconfig ath${VAP_NUM} flushatftable'
+        iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+
+        if [ ${ATF_ADVANCED} -eq 0 ]; then
+            ### Legacy Method ###
+            if [ "${ITER_AP_ENABLE_ATF}" -ne "0" ]; then
+
+               TOTAL_ENABLED_BSS=0
+               IN_COMMAND='let "TOTAL_ENABLED_BSS+=1"'
+               iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_vap" "none"
+               # Only apply weights applicable to more than one BSS.
+               if [ ${TOTAL_ENABLED_BSS} -gt 1 ]; then
+                   #Set the weights of only the SSIDs that are both enabled and non-zero weights
+                   IN_COMMAND='wlanconfig ath${VAP_NUM} addssid "${ITER_SSID}" "${ITER_BSSWEIGHT}"'
+                   iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_vap" "SSID"
+               fi
+
+               #Now that they are all set just commit the weights for each enabled vap to
+               #ensure it is executed at least one time per enabled radio.
+               IN_COMMAND='iwpriv ath${VAP_NUM} commitatf 1'
+               iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+
+               #Dump Tables of those enabled radios
+               IN_COMMAND='wlanconfig ath${VAP_NUM} showatftable'
+               iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+
+            else
+               # ATF disabled. This command properly clears old ATF settings
+               IN_COMMAND='iwpriv ath${VAP_NUM} commitatf 0'
+               iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+            fi
+            ### End Legacy Method ###
+        else 
+            ### Advanced Method ###
+            # BSS and STA weights only apply for algo type 2 (ATM)
+            if [ ${ITER_ATF_ALGO_TYPE} -eq 2 ]; then
+
+                # Set up the ssid weights if enabled:
+                if [ ${ITER_ATF_BSS_WEIGHT_EN} -ne 0 ]; then
+
+                   TOTAL_ENABLED_BSS=0
+                   IN_COMMAND='let "TOTAL_ENABLED_BSS+=1"'
+                   iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_vap" "none"
+
+                   # Only apply weights applicable to more than one BSS. 
+                   if [ ${TOTAL_ENABLED_BSS} -gt 1 ]; then
+                       IN_COMMAND='wlanconfig ath${VAP_NUM} addssid "${ITER_SSID}" "${ITER_BSSWEIGHT}"'
+                       iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_vap" "SSID"
+                   fi
+                fi
+
+                # Set up the sta weights if enabled:
+                if [ ${ITER_ATF_STA_WEIGHT_EN} -ne 0 ]; then
+                   configure_atf_stations "radio${r}"
+                fi
+            fi
+
+            # The following commands apply for both alog type 1 and 2:
+            if [ ${ITER_ATF_ALGO_TYPE} -ne 0 ]; then
+                #Now that they are all set just commit the weights for each enabled vap to
+                #ensure it is executed at least one time per enabled radio.
+                IN_COMMAND='iwpriv ath${VAP_NUM} commitatf 1'
+                iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+
+                #Dump Tables of those enabled radios
+                IN_COMMAND='wlanconfig ath${VAP_NUM} showatftable'
+                iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+            else
+                # ATF disabled. This command properly clears old ATF settings
+                IN_COMMAND='iwpriv ath${VAP_NUM} commitatf 0'
+                iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_radio" "none"
+            fi
+           ### End Advanced Method ###
+        fi
+        echo "================= DONE ATF radio${r} ============================"
+
+    done
+}
+
+if [ -z "${my_vaps}" ]; then
+    ### Command line usage (i.e. not from apup)
+    if   [ "$1" == "start_apup" ]; then
+        atf_lock
+        atf_start_apup
+    elif [ "$1" == "add_sta" ]; then
+        atf_apcfg_env
+        atf_add_sta ${2:-"000000000000"} ${3:-"0"}
+    elif [ "$1" == "del_sta" ]; then
+        atf_apcfg_env
+        atf_del_sta ${2:-"000000000000"}
+    elif [ "$1" == "del_all_sta" ]; then
+        atf_apcfg_env
+        atf_del_all_sta
+    elif [ "$1" == "sta_count" ]; then
+        atf_apcfg_env no_lock
+        atf_sta_count
+    elif [ "$1" == "sta_time" ]; then
+        atf_snap_env
+        atf_sta_time ${2:-"0"} ${3:-"0"}
+    elif [ "$1" == "sta_time_helper" ]; then
+        atf_snap_env no_lock
+        atf_sta_time_helper ${2:-"000000000000"} ${3:-"0"} ${4:-"0"} ${5:-"1"}
+    elif [ "$1" == "sta_time_stop"  ]; then
+        atf_snap_env
+        atf_sta_time_stop ${2:-"000000000000"}
+    elif [ "$1" == "get_sta_time" ]; then
+        atf_get_sta_time ${2:-"0"}
+    elif [ "$1" == "cleanup" ]; then
+        atf_cleanup
+    fi
+    exit 0
+else
+    # Prevent multiple instances of this script calling commitatf simultaneously   
+    atf_lock
+    ### Called from apup
+    atf_main
+    atf_end_apup
+    atf_unlock
+fi

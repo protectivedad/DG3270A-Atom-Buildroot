@@ -1,0 +1,612 @@
+###################################################################################
+##  apcfg
+##
+##  Configuration file for Atheros AP.
+##  This file will "predefine" default configuration data for the AP.  This
+##  will first read all configuration data from flash (cfg -e), then fill in any
+##  defaults that are missing.  Thus the defaults will appear on the web pages
+##  even if the configuration store has been cleared.
+##
+###################################################################################
+##
+## Get the current settings from flash/cache area
+##
+
+
+##
+## Set Network configuration
+##
+## AP_IPADDR  = IP address of the bridge
+## WAN_IPADDR = Fixed IP address of the WAN, if it's not bridged
+## WAN_MODE   = bridged for attached to bridged, Get address if dhcp, fixed address
+##              if static
+##
+###################################################################################
+configure_params(){
+
+cfg -a AP_IPADDR=${AP_IPADDR:="192.168.1.3"}
+cfg -a AP_NETMASK=${AP_NETMASK:="255.255.255.0"}
+cfg -a WAN_MODE=${WAN_MODE:="bridged"}
+cfg -a WAN_IPADDR=${WAN_IPADDR:="192.168.2.1"}
+cfg -a WAN_NETMASK=${WAN_NETMASK:="255.255.255.0"}
+
+##
+## Map the proper ethernet port to WAN/LAN interface
+##
+
+cfg -a WAN_IF=${WAN_IF:=eth0}
+cfg -a LAN_IF=${LAN_IF:=eth1}
+
+#
+# Indicate if you want the WLAN to be activated on boot up.
+#
+
+cfg -a WLAN_ON_BOOT=${WLAN_ON_BOOT:="n"}
+
+#
+# AP Start Mode
+# This can be overridded by environmental variables
+# Modes can be
+#    standard := standard single AP start mode
+#      rootap := WDS root AP for WDS modes
+#    repeater := WDS repeater station
+#repeater-ind := WDS repeater station independent mode
+#      client := WDS "virtual wire" client
+#       multi := Multiple BSSID with all encryption types
+#        dual := Dual concurrent, automatically configure interface
+#      stafwd := Station mode with address forwarding enabled
+#
+#
+
+cfg -a AP_STARTMODE=${AP_STARTMODE:="multivlan"}
+cfg -a AP_RADIO_ID=${AP_RADIO_ID:=1}
+cfg -a AP_RADIO_ID_2=${AP_RADIO_ID_2:=1}
+cfg -a AP_RADIO_ID_3=${AP_RADIO_ID_3:=1}
+cfg -a AP_RADIO_ID_4=${AP_RADIO_ID_4:=1}
+cfg -a AP_RADIO_ID_5=${AP_RADIO_ID_5:=1}
+cfg -a AP_RADIO_ID_6=${AP_RADIO_ID_6:=1}
+cfg -a AP_RADIO_ID_7=${AP_RADIO_ID_7:=1}
+cfg -a AP_RADIO_ID_8=${AP_RADIO_ID_8:=1}
+cfg -a AP_RADIO_ID_9=${AP_RADIO_ID_9:=0}
+cfg -a AP_RADIO_ID_10=${AP_RADIO_ID_10:=0}
+cfg -a AP_RADIO_ID_11=${AP_RADIO_ID_11:=0}
+cfg -a AP_RADIO_ID_12=${AP_RADIO_ID_12:=0}
+cfg -a AP_RADIO_ID_13=${AP_RADIO_ID_13:=0}
+cfg -a AP_RADIO_ID_14=${AP_RADIO_ID_14:=0}
+cfg -a AP_RADIO_ID_15=${AP_RADIO_ID_15:=0}
+cfg -a AP_RADIO_ID_16=${AP_RADIO_ID_16:=0}
+
+cfg -a AP_RADIO_SSID_QOS_0=${AP_RADIO_SSID_QOS_0:=0}
+cfg -a AP_RADIO_SSID_QOS_1=${AP_RADIO_SSID_QOS_1:=0}
+
+export NUMRADIO_AHB=0
+
+
+
+#################################################################################
+## Default Parameters
+## If these are not set explictly by exporting environmental variables, the following
+## Defaults will be applied
+#################################################################################
+#
+# AP_PRIMARY_CH could be
+#                a number or
+#                11na (which means auto-scan in 11na mode) or
+#                11ng (which means auto-scan in 11ng mode)
+
+cfg -a AP_PRIMARY_CH=${AP_PRIMARY_CH:=0}
+#cfg -a AP_CHMODE=${AP_CHMODE:="11NGHT20"}
+cfg -a AP_CHMODE=${AP_CHMODE:="11NAHT20"}
+
+##
+## Set up the channel for dual mode
+##
+
+cfg -a AP_PRIMARY_CH_2=${AP_PRIMARY_CH_2:=0}
+#cfg -a AP_CHMODE_2=${AP_CHMODE_2:="11NAHT20"}
+cfg -a AP_CHMODE_2=${AP_CHMODE_2:="11NGHT20"}
+
+##
+## This is for pure G or pure N operations.  Hmmmm...
+##
+
+cfg -a PUREG=${PUREG:=0}
+cfg -a PUREN=${PUREN:=0}
+cfg -a PUREG_2=${PUREG_2:=0}
+cfg -a PUREN_2=${PUREN_2:=0}
+cfg -a PUREAC=${PUREAC:=0}
+cfg -a PUREAC_2=${PUREAC_2:=0}
+
+##
+## Channel Configuration Section
+##
+
+
+cfg -a TXQUEUELEN=${TXQUEUELEN:=1000}
+cfg -a SHORTGI=${SHORTGI:=1}
+cfg -a SHORTGI_2=${SHORTGI_2:=1}
+
+#
+# Aggregation.  First parameter enables/disables,
+# second parameter sets the size limit
+#
+
+cfg -a AMPDUENABLE=${AMPDUENABLE:=1}
+cfg -a AMPDUENABLE_2=${AMPDUENABLE_2:=1}
+cfg -a AMPDUFRAMES=${AMPDUFRAMES:=32}
+cfg -a AMPDUFRAMES_2=${AMPDUFRAMES_2:=32}
+cfg -a AMPDULIMIT=${AMPDULIMIT:=50000}
+cfg -a AMPDULIMIT_2=${AMPDULIMIT_2:=50000}
+cfg -a AMPDUMIN=${AMPDUMIN:=32768}
+cfg -a AMPDUMIN_2=${AMPDUMIN_2:=32768}
+cfg -a CWMMODE=${CWMMODE:=1}
+cfg -a CWMMODE_2=${CWMMODE_2:=1}
+cfg -a RATECTL=${RATECTL:="auto"}
+cfg -a RATECTL_2=${RATECTL_2:="auto"}
+cfg -a MANRATE=${MANRATE:=0x8c8c8c8c}
+cfg -a MANRETRIES=${MANRETRIES:=0x04040404}
+cfg -a MANRATE_2=${MANRATE:=0x8c8c8c8c}
+cfg -a MANRETRIES_2=${MANRETRIES:=0x04040404}
+cfg -a RX_CHAINMASK=${RX_CHAINMASK:=7}
+cfg -a RX_CHAINMASK_2=${RX_CHAINMASK_2:=7}
+cfg -a TX_CHAINMASK=${TX_CHAINMASK:=7}
+cfg -a TX_CHAINMASK_2=${TX_CHAINMASK_2:=7}
+cfg -a AP_CUSTOM_LED=${AP_CUSTOM_LED:=1}
+cfg -a AP_CUSTOM_LED_2=${AP_CUSTOM_LED_2:=1}
+cfg -a AP_DISCOEXT=${AP_DISCOEXT:=0}
+cfg -a AP_DISCOEXT_2=${AP_DISCOEXT_2:=0}
+cfg -a AP_TXBURST=${AP_TXBURST:=0}
+cfg -a AP_TXBURST_2=${AP_TXBURST_2:=0}
+cfg -a AP_BADECLINE=${AP_BADECLINE:=0}
+cfg -a AP_BADECLINE_2=${AP_BADECLINE_2:=0}
+cfg -a AP_AMSDU=${AP_AMSDU:=0}
+cfg -a AP_AMSDU_2=${AP_AMSDU_2:=0}
+cfg -a AP_HT40INTOL=${AP_HT40INTOL:=0}
+cfg -a AP_HT40INTOL_2=${AP_HT40INTOL_2:=0}
+cfg -a AP_RXSTBC=${AP_RXSTBC:=1}
+cfg -a AP_TXSTBC=${AP_TXSTBC:=1}
+cfg -a AP_RXSTBC_2=${AP_RXSTBC_2:=1}
+cfg -a AP_TXSTBC_2=${AP_TXSTBC_2:=1}
+cfg -a AP_RADIO_ENABLED=${AP_RADIO_ENABLED:=1}
+cfg -a AP_RADIO_ENABLED_2=${AP_RADIO_ENABLED_2:=1}
+cfg -a AP_TXBF=${AP_TXBF:=0}
+cfg -a AP_TXBF_2=${AP_TXBF_2:=0}
+cfg -a AP_BLK_DFS=${AP_BLK_DFS:=0}
+cfg -a AP_BLK_DFS_2=${AP_BLK_DFS_2:=0}
+cfg -a AP_BKSCAN=${AP_BKSCAN:=1}
+cfg -a AP_BKSCAN_2=${AP_BKSCAN_2:=1}
+cfg -a AP_LMTOBSS=${AP_LMTOBSS:=1}
+cfg -a AP_LMTOBSS_2=${AP_LMTOBSS_2:=1}
+
+##
+## AP Identification Section
+##
+
+cfg -a AP_SSID="${AP_SSID:=Arris_2G}"
+
+if [ "${AP_STARTMODE}" = "dual" -o "${AP_STARTMODE}" = "multivlan" ]; then
+#cfg -a AP_SSID_2="${AP_SSID_2:=Arris_5G}"
+cfg -a AP_SSID_9="${AP_SSID_9:=Arris_5G}"
+fi
+if [ "${AP_STARTMODE}" = "multi" -o "${AP_STARTMODE}" = "multivlan" ]; then
+cfg -a WPS_INDEPENDENT=1
+cfg -a WEP_MBSSID=1
+fi
+##
+## Enable radio interfaces
+##
+cfg -a AP_ENABLE="${AP_ENABLE:=1}"
+cfg -a AP_ENABLE_9="${AP_ENABLE_9:=1}"
+cfg -a WPS_ENABLE="${WPS_ENABLE:=2}"
+cfg -a WPS_ENABLE_9="${WPS_ENABLE_9:=2}"
+cfg -a AP_VLAN=2
+cfg -a AP_VLAN_9=2
+#ARRIS ADD - Start
+cfg -a AP_BRNAME=${AP_BRNAME:="br0"}
+cfg -a AP_BRNAME_9=${AP_BRNAME_9:="br0"}
+##ARRIS ADD - End
+#
+##
+## Country Code is set to CTRY_UNITED_STATES2
+##
+cfg -a ATH_countrycode="${ATH_countrycode:=841}"
+cfg -a ATH_countrycode_2="${ATH_countrycode_2:=841}"
+##
+## Tx power 100%
+##
+cfg -a AP_TXPWR="${AP_TXPWR:=0}"
+cfg -a AP_TXPWR_2="${AP_TXPWR_2:=0}"
+
+##
+## Set the default modes for multi configuration
+## Set default security modes
+## Set default secfile to PSK, only valid in WPA mode
+## Default keys are Decimal (NOT hex)
+##
+export MAX_VAPS_PER_RADIO=8
+
+##
+## For the 4 wep keys, set the default values.  Note that the first key uses the _1
+## trailer - it's not a VAP number, it's the number of the key.  This is done for
+## both radios.
+##
+
+my_wep_keys="_1 _2 _3 _4"
+for i in $my_wep_keys;
+do
+    if [ "${i}" = "''" ]; then
+        i=""
+    fi
+    ITER_AP_WEP_RADIO_NUM0_KEY="WEP_RADIO_NUM0_KEY$i"
+    ITER_AP_WEP_RADIO_NUM1_KEY="WEP_RADIO_NUM1_KEY$i"
+    eval ITER_WEP_RADIO_NUM0_KEY=\$$ITER_AP_WEP_RADIO_NUM0_KEY
+    eval ITER_WEP_RADIO_NUM1_KEY=\$$ITER_AP_WEP_RADIO_NUM1_KEY
+    cfg -a $ITER_AP_WEP_RADIO_NUM0_KEY=${ITER_WEP_RADIO_NUM0_KEY:=""}
+    cfg -a $ITER_AP_WEP_RADIO_NUM1_KEY=${ITER_WEP_RADIO_NUM1_KEY:=""}
+done
+
+##
+## Now, for each radio, set the primary key and the mode value
+##
+
+cfg -a AP_PRIMARY_KEY_0="${AP_PRIMARY_KEY_0:=1}"
+cfg -a AP_PRIMARY_KEY_1="${AP_PRIMARY_KEY_1:=1}"
+cfg -a AP_WEP_MODE_0="${AP_WEP_MODE_0:=1}"
+cfg -a AP_WEP_MODE_1="${AP_WEP_MODE_1:=1}"
+##
+## IEEE AIRTIME FAIRNESS
+##
+cfg -a AP_ENABLE_ATF=${AP_ENABLE_ATF:="0"}
+
+
+
+my_vaps="'' _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16"
+for i in $my_vaps;
+do
+    if [ "${i}" = "''" ]; then
+        i=""
+    fi
+    ITER_AP_CYPHER="AP_CYPHER$i"
+	eval ITER_CYPHER=\$$ITER_AP_CYPHER
+    cfg -a $ITER_AP_CYPHER="${ITER_CYPHER:="TKIP CCMP"}"
+done
+DEFAULT_CFG_0="AP_MODE ap"
+DEFAULT_CFG_1="AP_SECMODE WPA"
+DEFAULT_CFG_2="AP_SECFILE PSK"
+#DEFAULT_CFG_3="WPS_ENABLE 1"
+DEFAULT_CFG_4="AP_WPA 3"
+#DEFAULT_CFG_5="AP_CYPHER TKIP CCMP"
+DEFAULT_CFG_6="PSK_KEY 12345678"
+DEFAULT_CFG_7="WSC_PIN 12345670"
+DEFAULT_CFG_8="AP_WMMAIFS 3;7;1;1"
+DEFAULT_CFG_9="AP_WMMCWMIN 4;4;3;2"
+DEFAULT_CFG_10="AP_WMMCWMAX 6;10;4;3"
+DEFAULT_CFG_11="AP_WMMTXOP 0;0;94;47"
+DEFAULT_CFG_12="AP_WMMACM 0;0;0;0"
+DEFAULT_CFG_13="AP_WMMBSSAIFS 3;7;2;2"
+DEFAULT_CFG_14="AP_WMMBSSCWMIN 4;4;3;2"
+DEFAULT_CFG_15="AP_WMMBSSCWMAX 10;10;4;3"
+DEFAULT_CFG_16="AP_WMMBSSTXOP 0;0;94;47"
+DEFAULT_CFG_17="AP_WMMBSSACM 0;0;0;0"
+DEFAULT_CFG_18="AP_AUTH_SERVER 0.0.0.0"
+DEFAULT_CFG_19="AP_AUTH_PORT 1812"
+DEFAULT_CFG_20="AP_AUTH_SECRET tempkey"
+DEFAULT_CFG_23="AP_INACT 30"
+DEFAULT_CFG_24="AP_EN11H 0"
+DEFAULT_CFG_25="BEACON_INT 100"
+DEFAULT_CFG_26="AP_DTIM 1"
+DEFAULT_CFG_27="AP_PROTMODE 1"
+DEFAULT_CFG_28="AP_TXPREAMBLE 1"
+DEFAULT_CFG_29="AP_RTSTHRES 2347"
+DEFAULT_CFG_30="AP_FRAGTHRES 2346"
+DEFAULT_CFG_31="AP_TXBURST 0"
+DEFAULT_CFG_32="AP_BLKACK 1"
+DEFAULT_CFG_33="AP_WMMEN 1"
+DEFAULT_CFG_34="AP_WMMAPSD 1"
+DEFAULT_CFG_35="AP_WMMACKPOLICY 0;0;0;0"
+DEFAULT_CFG_36="AP_APBRI 1"
+DEFAULT_CFG_37="AP_HIDESSID 0"
+DEFAULT_CFG_38="AP_RSN_ENA_PREAUTH 0"
+DEFAULT_CFG_39="AP_PRIMARY_KEY 1"
+DEFAULT_CFG_44="AP_MACADDRCTLEN 0"
+DEFAULT_CFG_45="AP_BLKACK_AC 1"
+DEFAULT_CFG_46="AP_SHORTGI 1"
+DEFAULT_CFG_NUM=46
+CFG_INI_NUM=0
+    for idx in $(seq 0 ${DEFAULT_CFG_NUM}); do
+        AP_DEFAULT_CFG="DEFAULT_CFG_${idx}"
+        eval AP_DEFAULT=\$${AP_DEFAULT_CFG}
+        num=0
+        DEFAULT_VALUE=""
+        DEFAULT_CMD=""
+        for i in ${AP_DEFAULT}; do
+            if [ "${num}" = "0" ]; then        
+                DEFAULT_CMD=${i}
+            else if [ "${num}" = "1" ]; then
+                DEFAULT_VALUE=${i}
+            fi
+            fi
+            num=`expr ${num} + 1`
+        done
+        #echo "${CFG_INI_NUM}: DEFAULT_CFG_${idx}: ${DEFAULT_CMD} ${DEFAULT_VALUE}"
+        if [ "${DEFAULT_CMD}" = "" ]; then
+            continue
+        fi
+        for vid in $my_vaps; do
+        if [ "${vid}" = "''" ]; then
+            vid=""
+        fi
+        ITER_APCMD="$DEFAULT_CMD${vid}"
+        eval ITER_CMD=\$$ITER_APCMD
+        cfg -a $ITER_APCMD=${ITER_CMD:=${DEFAULT_VALUE}}
+        #echo "${ITER_APCMD}=${ITER_CMD}"
+done
+done
+	CFG_INI_NUM=$(($CFG_INI_NUM+1))
+
+#####################################################################################
+## The following parameters are board specific, and should not be modified
+#####################################################################################
+export ATH_use_eeprom=1
+# ARRIS REMOVE - actually the end of this function is after ALL "cfg -a"s # }
+###################################################################################
+##  apcfg
+##
+##  Configuration file for Atheros AP.
+##  This file will "predefine" default configuration data for the AP.  This
+##  will first read all configuration data from flash (cfg -e), then fill in any
+##  defaults that are missing.  Thus the defaults will appear on the web pages
+##  even if the configuration store has been cleared.
+##
+###################################################################################
+##
+## Get the current settings from flash/cache area
+##
+#if [ ! -e /nvram/etc/ath/defaultData ]; then
+#	touch /tmp/.apcfg
+#	configure_params 
+#	cfg -c
+#	cp /nvram/etc/ath/.configData /nvram/etc/ath/defaultData
+#fi
+
+cfg -a AP_SECFILE=${AP_SECFILE:="PSK"}
+cfg -a AP_SECFILE_2=${AP_SECFILE_2:="PSK"}
+cfg -a AP_SECFILE_3=${AP_SECFILE_3:="PSK"}
+cfg -a AP_SECFILE_4=${AP_SECFILE_4:="PSK"}
+cfg -a AP_SECFILE_5=${AP_SECFILE_5:="PSK"}
+cfg -a AP_SECFILE_6=${AP_SECFILE_6:="PSK"}
+cfg -a AP_SECFILE_7=${AP_SECFILE_7:="PSK"}
+cfg -a AP_SECFILE_8=${AP_SECFILE_8:="PSK"}
+cfg -a AP_SECFILE_9=${AP_SECFILE_9:="PSK"}
+cfg -a AP_SECFILE_10=${AP_SECFILE_10:="PSK"}
+cfg -a AP_SECFILE_11=${AP_SECFILE_11:="PSK"}
+cfg -a AP_SECFILE_12=${AP_SECFILE_12:="PSK"}
+cfg -a AP_SECFILE_13=${AP_SECFILE_13:="PSK"}
+cfg -a AP_SECFILE_14=${AP_SECFILE_14:="PSK"}
+cfg -a AP_SECFILE_15=${AP_SECFILE_15:="PSK"}
+cfg -a AP_SECFILE_16=${AP_SECFILE_16:="PSK"}
+
+
+cfg -a WPS_ENABLE=${WPS_ENABLE:="0"}
+cfg -a WPS_ENABLE_2=${WPS_ENABLE_2:="0"}
+cfg -a WPS_ENABLE_3=${WPS_ENABLE_3:="0"}
+cfg -a WPS_ENABLE_4=${WPS_ENABLE_4:="0"}
+cfg -a WPS_ENABLE_5=${WPS_ENABLE_5:="0"}
+cfg -a WPS_ENABLE_6=${WPS_ENABLE_6:="0"}
+cfg -a WPS_ENABLE_7=${WPS_ENABLE_7:="0"}
+cfg -a WPS_ENABLE_8=${WPS_ENABLE_8:="0"}
+cfg -a WPS_ENABLE_9=${WPS_ENABLE_9:="0"}
+cfg -a WPS_ENABLE_10=${WPS_ENABLE_10="0"}
+cfg -a WPS_ENABLE_11=${WPS_ENABLE_11="0"}
+cfg -a WPS_ENABLE_12=${WPS_ENABLE_12="0"}
+cfg -a WPS_ENABLE_13=${WPS_ENABLE_13="0"}
+cfg -a WPS_ENABLE_14=${WPS_ENABLE_14="0"}
+cfg -a WPS_ENABLE_15=${WPS_ENABLE_15="0"}
+cfg -a WPS_ENABLE_16=${WPS_ENABLE_16="0"}
+
+## VoW defaults
+cfg -a VOW_ENABLE=${VOW_ENABLE:="0"}
+cfg -a VOW_DEBUG=${VOW_DEBUG:="0"}
+cfg -a VOW_ENABLE_2=${VOW_ENABLE_2:="0"}
+cfg -a VOW_DEBUG_2=${VOW_DEBUG_2:="0"}
+
+##
+## Default keys are Decimal (NOT hex)
+##
+
+cfg -a WEP_IS_HEX1=${WEP_IS_HEX1:="0"}
+cfg -a WEP_IS_HEX2=${WEP_IS_HEX2:="0"}
+cfg -a WEP_IS_HEX3=${WEP_IS_HEX3:="0"}
+cfg -a WEP_IS_HEX4=${WEP_IS_HEX4:="0"}
+cfg -a WEP_IS_HEX5=${WEP_IS_HEX5:="0"}
+cfg -a WEP_IS_HEX6=${WEP_IS_HEX6:="0"}
+cfg -a WEP_IS_HEX7=${WEP_IS_HEX7:="0"}
+cfg -a WEP_IS_HEX8=${WEP_IS_HEX8:="0"}
+cfg -a WEP_IS_HEX9=${WEP_IS_HEX9:="0"}
+cfg -a WEP_IS_HEX10=${WEP_IS_HEX10:="0"}
+cfg -a WEP_IS_HEX11=${WEP_IS_HEX11:="0"}
+cfg -a WEP_IS_HEX12=${WEP_IS_HEX12:="0"}
+cfg -a WEP_IS_HEX13=${WEP_IS_HEX13:="0"}
+cfg -a WEP_IS_HEX14=${WEP_IS_HEX14:="0"}
+cfg -a WEP_IS_HEX15=${WEP_IS_HEX15:="0"}
+cfg -a WEP_IS_HEX16=${WEP_IS_HEX16:="0"}
+
+cfg -a WPA_IS_HEX=${WPA_IS_HEX:="0"}
+cfg -a WPA_IS_HEX_2=${WPA_IS_HEX_2:="0"}
+cfg -a WPA_IS_HEX_3=${WPA_IS_HEX_3:="0"}
+cfg -a WPA_IS_HEX_4=${WPA_IS_HEX_4:="0"}
+cfg -a WPA_IS_HEX_5=${WPA_IS_HEX_5:="0"}
+cfg -a WPA_IS_HEX_6=${WPA_IS_HEX_6:="0"}
+cfg -a WPA_IS_HEX_7=${WPA_IS_HEX_7:="0"}
+cfg -a WPA_IS_HEX_8=${WPA_IS_HEX_8:="0"}
+cfg -a WPA_IS_HEX_9=${WPA_IS_HEX_9:="0"}
+cfg -a WPA_IS_HEX_10=${WPA_IS_HEX_10:="0"}
+cfg -a WPA_IS_HEX_11=${WPA_IS_HEX_11:="0"}
+cfg -a WPA_IS_HEX_12=${WPA_IS_HEX_12:="0"}
+cfg -a WPA_IS_HEX_13=${WPA_IS_HEX_13:="0"}
+cfg -a WPA_IS_HEX_14=${WPA_IS_HEX_14:="0"}
+cfg -a WPA_IS_HEX_15=${WPA_IS_HEX_15:="0"}
+cfg -a WPA_IS_HEX_16=${WPA_IS_HEX_16:="0"}
+
+##
+## IEEE 802.11v Proxy ARP Support
+##
+cfg -a IEEE80211V_PROXYARP=${IEEE80211V_PROXYARP:="0"}
+
+
+##
+## IEEE ACS CHANNEL HOPPING SUPPORT
+##
+cfg -a ACS_CHANNEL_HOPPING=${ACS_CHANNEL_HOPPING:="0"}
+
+##
+## BAND STEERING
+##
+cfg -a BS_ENABLE=${BS_ENABLE:="0"}
+cfg -a BS_MATCHING_SSID=${BS_MATCHING_SSID:="band_steering"}
+cfg -a BS_PHY_BASED_PRIORITIZATION=${BS_PHY_BASED_PRIORITIZATION:="0"}
+cfg -a BS_ADV_AGE_LIMIT=${BS_ADV_AGE_LIMIT:="5"}
+
+cfg -a BS_STADB_INCLUDEOUTOFNETWORK=${BS_STADB_INCLUDEOUTOFNETWORK:="1"}
+cfg -a BS_STADBADV_AGINGSIZETHRESHOLD=${BS_STADBADV_AGINGSIZETHRESHOLD:="100"}
+cfg -a BS_STADBADV_AGINGFREQUENCY=${BS_STADBADV_AGINGFREQUENCY:="60"}
+cfg -a BS_STADBADV_OUTOFNETWORKMAXAGE=${BS_STADBADV_OUTOFNETWORKMAXAGE:="300"}
+cfg -a BS_STADBADV_INNETWORKMAXAGE=${BS_STADBADV_INNETWORKMAXAGE:="2592000"}
+
+cfg -a BS_STAMON_RSSIMEASURESAMPLES_W2=${BS_STAMON_RSSIMEASURESAMPLES_W2:="5"}
+cfg -a BS_STAMON_RSSIMEASURESAMPLES_W5=${BS_STAMON_RSSIMEASURESAMPLES_W5:="5"}
+cfg -a BS_STAMON_RSSIDIFF_ESTW5FROMW2=${BS_STAMON_RSSIDIFF_ESTW5FROMW2:="-20"}
+cfg -a BS_STAMON_RSSIDIFF_ESTW2FROMW5=${BS_STAMON_RSSIDIFF_ESTW2FROMW5:="10"}
+cfg -a BS_BANDMON_PROBECOUNTTHRESHOLD=${BS_BANDMON_PROBECOUNTTHRESHOLD:="1"}
+
+cfg -a BS_SE_STEERINGPROHIBITTIME=${BS_SE_STEERINGPROHIBITTIME:="300"}
+cfg -a BS_SE_BTM_STEERINGPROHIBITTIME=${BS_SE_BTM_STEERINGPROHIBITTIME:="30"}
+cfg -a BS_SE_TSTEERING=${BS_SE_TSTEERING:="15"}
+cfg -a BS_SE_INITAUTHREJCOALESCETIME=${BS_SE_INITAUTHREJCOALESCETIME:="2"}
+cfg -a BS_SE_AUTHREJMAX=${BS_SE_AUTHREJMAX:="3"}
+cfg -a BS_SE_STEERINGUNFRIENDLYTIME=${BS_SE_STEERINGUNFRIENDLYTIME:="600"}
+cfg -a BS_SE_MAX_STEER_UNFRIENDLY=${BS_SE_MAX_STEER_UNFRIENDLY:="604800"}
+cfg -a BS_SE_TARGETLOWRSSITHRESHOLD_W2=${BS_SE_TARGETLOWRSSITHRESHOLD_W2:="5"}
+cfg -a BS_SE_TARGETLOWRSSITHRESHOLD_W5=${BS_SE_TARGETLOWRSSITHRESHOLD_W5:="15"}
+cfg -a BS_SE_BLACKLISTTIME=${BS_SE_BLACKLISTTIME:="86400"}
+cfg -a BS_SE_BTM_RESPONSE_TIME=${BS_SE_BTM_RESPONSE_TIME:="10"}
+cfg -a BS_SE_BTM_ASSOC_TIME=${BS_SE_BTM_ASSOC_TIME:="6"}
+cfg -a BS_SE_BTM_BLACKLIST=${BS_SE_BTM_BLACKLIST:="1"}
+cfg -a BS_SE_BTM_UNFRIENDLY_TIME=${BS_SE_BTM_UNFRIENDLY_TIME:="600"}
+cfg -a BS_SE_MAX_BTM_UNFRIENDLY=${BS_SE_MAX_BTM_UNFRIENDLY:="86400"}
+cfg -a BS_SE_MAX_BTM_ACTIVE_UNFRIENDLY=${BS_SE_MAX_BTM_ACTIVE_UNFRIENDLY:="604800"}
+cfg -a BS_SE_MINRSSI_BEST_EFFORT=${BS_SE_MINRSSI_BEST_EFFORT:="12"}
+cfg -a BS_SE_LOW_RSSIXING_THRESHOLD=${BS_SE_LOW_RSSIXING_THRESHOLD:="10"}
+
+cfg -a BS_IS_NORM_INACT_TIMEOUT=${BS_IS_NORM_INACT_TIMEOUT:="10"}
+cfg -a BS_IS_OVERLOAD_INACT_TIMEOUT=${BS_IS_OVERLOAD_INACT_TIMEOUT:="10"}
+cfg -a BS_IS_INACTCHECKINTERVAL=${BS_IS_INACTCHECKINTERVAL:="1"}
+cfg -a BS_IS_RSSI_STEERPOINT_DG=${BS_IS_RSSI_STEERPOINT_DG:="5"}
+# ARRIS MOD - From BS_RSSI_STEERING_POINT_UG to BS_IS_RSSI_STEERING_POINT_UG 
+cfg -a BS_IS_RSSI_STEERING_POINT_UG=${BS_IS_RSSI_STEERING_POINT_UG:="30"}
+
+cfg -a BS_AS_TXRATEXING_THRESHOLD_UG=${BS_AS_TXRATEXING_THRESHOLD_UG:="50000"}
+cfg -a BS_AS_RATERSSIXING_THRESHOLD_UG=${BS_AS_RATERSSIXING_THRESHOLD_UG:="40"}
+cfg -a BS_AS_RATERSSIXING_THRESHOLD_DG=${BS_AS_RATERSSIXING_THRESHOLD_DG:="0"}
+
+cfg -a BS_OL_MU_AVG_PERIOD=${BS_OL_MU_AVG_PERIOD:="60"}
+cfg -a BS_OL_MU_OVERLOAD_THRESHOLD_W2=${BS_OL_MU_OVERLOAD_THRESHOLD_W2:="70"}
+cfg -a BS_OL_MUS_OVRLD_THRESHOLD_W5=${BS_OL_MUS_OVRLD_THRESHOLD_W5:="70"}
+cfg -a BS_OL_MU_SAFETY_THRESHOLD_W2=${BS_OL_MU_SAFETY_THRESHOLD_W2:="50"}
+cfg -a BS_OL_MU_SAFETY_THRESHOLD_W5=${BS_OL_MU_SAFETY_THRESHOLD_W5:="60"}
+cfg -a BS_OL_OFFLOADING_MIN_RSSI=${BS_OL_OFFLOADING_MIN_RSSI:="20"}
+
+cfg -a BS_BANDMON_MUCHECK_INTERVAL_W2=${BS_BANDMON_MUCHECK_INTERVAL_W2:="10"}
+
+cfg -a BS_EST_RSSIDIFF_ESTW5FROMW2=${BS_EST_RSSIDIFF_ESTW5FROMW2:="-15"}
+cfg -a BS_EST_RSSIDIFF_ESTW2FROMW5=${BS_EST_RSSIDIFF_ESTW2FROMW5:="5"}
+cfg -a BS_EST_PROBE_COUNT_THRESHOLD=${BS_EST_PROBE_COUNT_THRESHOLD:="3"}
+cfg -a BS_EST_STATS_SAMPLE_INTERVAL=${BS_EST_STATS_SAMPLE_INTERVAL:="1"}
+cfg -a BS_EST_11KPROHIBIT_TIME=${BS_EST_11KPROHIBIT_TIME:="30"}
+cfg -a BS_EST_PHYRATESCALLING_AIRTIME=${BS_EST_PHYRATESCALLING_AIRTIME:="50%"}
+cfg -a BS_EST_ENABLE_CONTINUOUS_TP=${BS_EST_ENABLE_CONTINUOUS_TP:="0"}
+cfg -a BS_EST_BCNRPT_ACTIVE_DURATION=${BS_EST_BCNRPT_ACTIVE_DURATION:="50"}
+cfg -a BS_EST_BCNRPT_PASSIVE_DURATION=${BS_EST_BCNRPT_PASSIVE_DURATION:="200"}
+cfg -a BS_SALG_MINTXRATEINC_THRESHOLD=${BS_SALG_MINTXRATEINC_THRESHOLD:="53"}
+
+cfg -a BS_AS_LOWTXRATEXING_THRESHLD_DG=${BS_AS_LOWTXRATEXING_THRESHLD_DG:="6000"}
+cfg -a BS_AS_RATERSSIXING_TH_DG=${BS_AS_RATERSSIXING_TH_DG:="0"}
+cfg -a AP_SSID="${AP_SSID:=Atheros_XSpan_2G}"
+cfg -a AP_STARTMODE=${AP_STARTMODE:="standard"}
+
+} # ARRIS ADD - the end of this function is actually belongs here ( after all "cfg -a's" )
+
+##
+## Export the variables again to catch the defaults
+##
+
+if [ -e /tmp/.apcfg ]; then #ARRIS ADD - Only call "cfg -e" if .apcfg exists else it throws an error. 
+  cfg -e > /tmp/vars.$$
+  . /tmp/vars.$$
+  rm /tmp/vars.$$
+fi #ARRIS ADD 
+
+if [ ! -e /nvram/etc/wpa2/ ]; then
+	mkdir -p /nvram/etc/wpa2/
+fi	
+if [ ! -e /nvram/etc/ath/.configData ]; then # ARRIS MOD - removed -o $(stat -c%s /nvram/etc/ath/.configData) -le 10
+	if [ ! -e /nvram/etc/ath/defaultData ]; then
+	  touch /tmp/.apcfg
+	  if [ ! -e /nvram/etc/ath/.configData ]; then
+	  	touch /nvram/etc/ath/.configData
+	  fi	
+		configure_params
+		cfg -c
+		cp /nvram/etc/ath/.configData /nvram/etc/ath/defaultData
+	else
+	  cp /nvram/etc/ath/defaultData /nvram/etc/ath/.configData
+	  cp /nvram/etc/ath/defaultData /tmp/.apcfg
+	fi
+else
+    if [ ! -e /tmp/.apcfg ]; then # ARRIS MOD - removed -a $(stat -c%s /tmp/.apcfg) -le 10. added '!'
+	   if [ ! -e /nvram/etc/ath/defaultData ]; then
+	     touch /tmp/.apcfg
+	   	 configure_params
+	   	 cfg -c
+	   	 cp /nvram/etc/ath/.configData /nvram/etc/ath/defaultData
+	   else
+         # ARRIS MOD START - this logic was originally flawed:  In this case, i.e.
+         #  if -e .configData && !-e .apcfg -> we should copy from .configData, not defaultData
+	     #   cp /nvram/etc/ath/defaultData /nvram/etc/ath/.configData
+	     #   cp /nvram/etc/ath/defaultData /tmp/.apcfg
+	     cp /nvram/etc/ath/.configData /tmp/.apcfg
+         # ARRIS MOD END
+       fi
+	fi
+fi		
+##
+## Set the proper radio parameter values depending on the
+## interface selected.  These are exported vice included
+## in cache. These should really be in apup vice here,
+## but this works OK.
+##
+
+export MAX_VAPS_PER_RADIO=8
+my_vaps="'' _2 _3 _4 _5 _6 _7 _8 _9 _10 _11 _12 _13 _14 _15 _16"
+#my_vaps="'' _2 _3 _9 _10"
+for i in $my_vaps;
+do
+    if [ "${i}" = "''" ]; then
+        i=""
+    fi
+    ITER_RADIO_ID="AP_RADIO_ID$i"
+    ITER_RFPARAM="AP_RFPARAM$i"
+    eval ITER_RADIO_ID=\$$ITER_RADIO_ID
+    if [ "${ITER_RADIO_ID}" = "1" ]; then
+        export $ITER_RFPARAM=RF:$AP_PRIMARY_CH_2:$AP_CHMODE_2
+    else
+        export $ITER_RFPARAM=RF:$AP_PRIMARY_CH:$AP_CHMODE
+    fi
+done
+
+#####################################################################################
+## The following parameters are board specific, and should not be modified
+#####################################################################################
+
+export ATH_use_eeprom=1
+

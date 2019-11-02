@@ -1,0 +1,50 @@
+# /etc/profile
+
+
+# Enviromental variables
+#------------------------------------------------------------------------------
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/scripts
+LD_LIBRARY_PATH=.:/usr/local/lib:/usr/lib:/lib:/lib/gstreamer-0.10
+GST_PLUGIN_PATH=/lib/gstreamer-0.10
+HISTSIZE=1000
+HISTFILE="$HOME/.history"
+#ARRIS ADD - Start
+#Setup Celeno environment veriable
+clr_install_dir=/etc/Wireless/CLR260
+clr_cfg_dir=/tmp
+clr_eeprom_dir=/nvram
+export clr_install_dir clr_cfg_dir clr_eeprom_dir
+#ARRIS ADD - End
+
+# Export the above variables to the users shell
+#------------------------------------------------------------------------------
+export PATH HISTFILE HISTSIZE LD_LIBRARY_PATH GST_PLUGIN_PATH
+
+# Trusted group setup for non-root users
+#
+# The system environment variable APP_TRUSTED_GROUP_NAME when defined (by
+# uncommenting the following line) identifies the name of a trusted group that
+# all non-root users must belong to use the DirectFB API.  By defining
+# APP_TRUSTED_GROUP_NAME the following device nodes(s) will have the associated
+# group set to that name and file permissions set to 0660 (if they are
+# created):
+# /dev/input/event*|js[0-9]*|mice|mouse*|ts[0-9]*|uinput, /dev/fusion[0-9]*, 
+# /dev/galcore.ko and /dev/tty0.
+#------------------------------------------------------------------------------
+#export APP_TRUSTED_GROUP_NAME=Trusted
+if [ -n "$APP_TRUSTED_GROUP_NAME" ] ; then
+    # Create the identified trusted group if necessary.
+    touch /etc/group
+    foundGroupName=$(cut -d: -f1 /etc/group | grep "^$APP_TRUSTED_GROUP_NAME\$")
+    if [ -z "$foundGroupName" ] ; then
+        addgroup $APP_TRUSTED_GROUP_NAME
+    fi
+fi
+
+
+# Aliases
+#------------------------------------------------------------------------------
+# Busybox does not currently support alias so these commands are not enabled
+#alias ls="ls --color=auto"
+#alias lf="ls -lF"
+#alias lff="ls -alF"

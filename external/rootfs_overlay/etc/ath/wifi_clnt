@@ -1,0 +1,256 @@
+#!/bin/sh
+#Copyright 2014, ARRIS Group, Inc., All rights reserved.
+#
+
+########### Functions #################
+usage()
+{
+    echo "Usage: wifi_clnt -m <client|AP> -r <2|5> -s <ssid> -x <None|WPA|WEP> -y <AP_CYPHER> -p <psk>"
+    echo "Example: wifi_clnt -m client -r 5 -s HOME-DF72-5 -c 11ACVHT80 -x None"
+    exit 1;
+}
+
+curr_clnt_mode=`cfg -s | grep AP_STARTMODE:= | cut -d'=' -f2`
+if [ "$curr_clnt_mode" == "client" ]; then
+    curr_clnt_mode="y"
+else
+    curr_clnt_mode="n"
+fi
+
+curr_radio=`cfg -s | grep AP_RADIO_ID:= | cut -d'=' -f2`
+curr_ssid=`cfg -s | grep AP_SSID:= | cut -d'=' -f2`
+# if [ "$curr_radio" == "0" ]; then
+#     curr_chmode=`cfg -s | grep AP_CHMODE:= | cut -d'=' -f2`
+# else
+#     curr_chmode=`cfg -s | grep AP_CHMODE_2:= | cut -d'=' -f2`
+# fi
+curr_secmode=`cfg -s | grep AP_SECMODE:= | cut -d'=' -f2`
+curr_cypher=`cfg -s | grep AP_CYPHER:= | cut -d'=' -f2`
+curr_psk=`cfg -s | grep PSK_KEY:= | cut -d'=' -f2`
+
+########### Command Line Mode - START ################
+if [ "$1" != "" ] ; then
+    command_line_mode="y"
+    client_mode=$curr_clnt_mode
+    in_radio=$curr_radio
+    in_ssid=$curr_ssid
+    # in_chmode=$curr_chmode
+    in_secmode=$curr_secmode
+    in_cypher=$curr_cypher
+    in_psk=$curr_psk
+    while : ; do
+        if [ "$1" == "" ]; then break; fi
+        if [ "$2" == "" ]; then echo "Bad input for $1"; usage; fi
+        # parse input
+        case $1 in
+            -m)
+            if [ "$2" == "client" ]; then
+                client_mode="y";
+            elif [ "$2" == "AP" ]; then
+                client_mode="n";
+            else echo "Bad input for $1"; usage; fi
+            shift 2;;
+            -r)
+            case $2 in
+                5* ) in_radio="0";;
+                2* ) in_radio="1";;
+                * ) echo "Bad input for $1"; usage; esac
+            shift 2;;
+            -s)
+            in_ssid=$2;
+            shift 2;;
+            # Removed since I noticed that 11ACVHT80 works for all 5G AP's and 11NGHT20 works with all 2.4G
+            # NOTE: 11NGHT40 does not work without a PLUS or MINUS at the end.  MINUS does not work for chan 1 and PLUS does not work for chan 11.
+            # -c)
+            # case $2 in
+            #    11*) in_chmode=$2;;
+            #    *) echo "Bad input for $1"; usage; esac
+            # shift 2;;
+            -x)
+            if [ "$2" == "None" ] || [ "$2" == "WPA" ] || [ "$2" == "WEP" ]; then
+                in_secmode=$2;
+            else echo "Bad input for $1"; usage; fi
+            shift 2;;
+            -y)
+            in_cypher="$2";
+            shift 2;;
+            -p)
+            in_psk="$2";
+            shift 2;;
+            *)
+            echo "Unexpected Option: $1"; usage;;
+        esac
+    done
+########### Command Line Mode - END  #################
+########### Prompt User Mode - START #################
+else
+    read -p "Enable Client mode? [y/n] (currently $curr_clnt_mode) " client_mode
+    case $client_mode in
+        [Yy]* ) client_mode="y"; break;;
+        [Nn]* ) client_mode="n"; break;;
+        * ) client_mode=$curr_clnt_mode;
+    esac
+
+    if [ "$client_mode" == "y" ]; then
+        # User selected to enable client mode:
+        radio_prompt="2.4GHz"
+        if [ "$curr_radio" -eq "0" ]; then
+            radio_prompt="5GHz"
+        fi
+        read -p "Which Radio - 2.4GHz or 5GHz? [2/5] (currently $radio_prompt) " in_radio
+        case $in_radio in
+            5* ) in_radio="0"; break;;
+            2* ) in_radio="1"; break;;
+            * ) in_radio=$curr_radio;
+        esac
+        read -p "What is the AP's SSID? (currently $curr_ssid) " in_ssid
+        if [ "$in_ssid" == "" ]; then
+            in_ssid="$curr_ssid"
+        fi
+
+        # Removed since I noticed 11ACVHT80 works for all 5G AP's and 11NGHT20 works for all 2.4G.
+        # read -p "What is the AP's CHMODE? (currently $curr_chmode) " in_chmode
+        # if [ "$in_chmode" == "" ]; then
+        #    in_chmode=$curr_chmode
+        # fi
+
+        read -p "What is the AP's SECMODE? (currently $curr_secmode) " in_secmode
+        if [ "$in_secmode" == "" ]; then
+            in_secmode=$curr_secmode
+        fi
+
+        if [ "$in_secmode" != "None" ]; then
+            if [ ! -f /nvram/etc/ath/wpa_supplicant ] && [ ! -f /tmp/wpa_supplicant ] ; then
+                echo "Could not find wpa_supplicant in /nvram/etc/ath or /tmp"
+                echo "Setting SECMODE as \"None\""
+                in_secmode="None"
+            elif [ ! -f /nvram/etc/ath/wpa_cli ] && [ ! -f /tmp/wpa_cli ] ; then
+                echo "Could not find wpa_cli in /nvram/etc/ath or /tmp"
+                echo "Setting SECMODE as \"None\""
+                in_secmode="None"
+            else
+                read -p "What is the AP's CYPHER? (currently \"$curr_cypher\") " in_cypher
+                if [ "$in_cypher" == "" ]; then
+                    in_cypher="$curr_cypher"
+                fi
+                read -p "What is the AP's PSK_KEY? (currently $curr_psk) " in_psk
+                if [ "$in_psk" == "" ]; then
+                    in_psk=$curr_psk
+                fi
+            fi
+        fi
+    fi
+fi
+##### Prompt User Mode - End #####
+
+################ Apply CFG Settings #####################
+if [ "$client_mode" != "y" ]; then
+    # Disable client mode:
+    if [ -e /nvram/etc/ath/wlandbg ]; then
+        echo "rm /nvram/etc/ath/wlandbg"
+        rm /nvram/etc/ath/wlandbg
+    fi
+
+    # APPLY CFG SETTINGS:
+    if [ -e /tmp/wifi_defaults.dat ] && [ -e /tmp/.apcfg ]; then
+        echo "Applying /tmp/wifi_defaults.dat..."
+        # Find the 2nd-to-last line:
+        nlines=`wc -l /tmp/.apcfg | cut -f1 -d'/'`;
+        nlines=$(($nlines-1));
+        # Append to the end... starting at 2nd-to-last line (skip the @@@@):
+        head -n $nlines /tmp/.apcfg > /tmp/temp_defaults.txt;
+        cat /tmp/wifi_defaults.dat >> /tmp/temp_defaults.txt;
+        mv /tmp/temp_defaults.txt /tmp/.apcfg;
+        cfg -c;
+    else
+        echo "/tmp/wifi_defaults.dat not found. Please reset unit (with GW enabled) to restore wifi defaults."
+    fi
+ 
+fi
+if [ "$client_mode" == "y" ]; then
+    # APPLY CFG SETTINGS:
+    cfg -a AP_ENABLE=1
+    cfg -a AP_ENABLE_2=0
+    cfg -a AP_ENABLE_9=0
+    cfg -a WPS_ENABLE=0
+    cfg -a AP_VAP_NUM=0
+    cfg -a AP_RADIO_ID=$in_radio
+    cfg -a AP_STARTMODE=client
+    cfg -a AP_SSID="$in_ssid"
+    if [ "$in_radio" == "0" ]; then
+        cfg -a AP_CHMODE="11ACVHT80"   # removed - $in_chmode
+    else
+        cfg -a AP_CHMODE_2="11NGHT20"  # removed - $in_chmode
+    fi
+    cfg -a AP_SECMODE=$in_secmode
+
+    if [ "$in_psk" != "" ]; then
+        cfg -a PATH="$PATH:/nvram/etc/ath:/tmp"
+        cfg -a AP_CYPHER="$in_cypher"
+        cfg -a PSK_KEY=$in_psk
+    fi
+    cfg -c
+    # Make settings persistent accross reboots:
+    if [ ! -e /nvram/etc/ath/wlandbg ]; then
+        printf "\
+# Wait for br0 to be created (give up after 60 seconds) \n\
+COUNTER=0 \n\
+while [ \`brctl show | grep -c br0\` -eq 0 ]; do\n\
+    sleep 1;\n\
+    let COUNTER=COUNTER+1\n\
+    echo \"The counter is \$COUNTER\"\n\
+    if [ \$COUNTER -gt 60 ]; then\n\
+        exit 0;\n\
+    fi\n\
+done\n\
+# Now we can initialize the radios\n\
+apup\n\
+# Also, (because apup didn't do this) add eth0.2 to br0\n\
+brctl addif br0 eth0.2\n"\
+        >> /nvram/etc/ath/wlandbg
+        chmod +x /nvram/etc/ath/wlandbg
+    fi
+fi
+
+############# Run-time Apply Now ##########################
+
+loaded_prompt="y"
+curr_loaded=`lsmod | grep -c ath`
+if [ "$curr_loaded" -eq "0" ]; then
+    loaded_prompt="n"
+fi
+
+if [ "$command_line_mode" == "y" ]; then
+    apply_now="y"
+else
+    read -p "Settings Saved. Apply mode now? [y/n] (currently $loaded_prompt) " apply_now
+    case $apply_now in
+        [Yy]* ) apply_now="y"; break;;
+        [Nn]* ) apply_now="n"; break;;
+        * ) apply_now=$loaded_prompt;
+    esac
+fi
+if [ "$apply_now" == "y" ]; then
+
+    if [ "$client_mode" != "y" ]; then
+        if [ "$curr_clnt_mode" == "y" ] && [ "$loaded_prompt" == "y" ]; then
+            apdown
+            apup
+        fi
+    fi
+
+    if [ "$client_mode" == "y" ] ; then
+        # if we need to undo previous changes:
+        if [ "$curr_loaded" -ne "0" ]; then
+            if [ "$curr_clnt_mode" == "y" ]; then
+                 # Was already a client. Only killVAP is needed
+                 killVAP all
+             else
+                 # Was an AP before. Need a full apdown.
+                 apdown
+             fi
+         fi
+         apup
+         brctl addif br0 eth0.2
+     fi
+fi

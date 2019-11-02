@@ -1,0 +1,29 @@
+#!/bin/sh
+
+#-----------------------------------------------------------------------------
+# Copyright 2008-2012 Intel Corporation All Rights Reserved.
+#
+# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#
+# This Distributable As Sample Source Software is subject to the terms and
+# conditions of the Intel Software License Agreement provided with the Intel(R)
+# Media Processor Software Development Kit.
+#-----------------------------------------------------------------------------
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+
+echo ""
+echo ""
+echo "-------------------------------------------------------------------------"
+echo "                            N O T I C E :"
+echo ""
+echo "Could not find the script associated with the '$0' init script."
+echo "This is likely because the component providing this script was disabled"
+echo "during your build. If you did not disable this component manually please"
+echo "contact the component owner to correct this issue."
+echo ""
+echo "-------------------------------------------------------------------------"
+echo ""
+echo ""
+

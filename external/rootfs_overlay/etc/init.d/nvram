@@ -1,0 +1,216 @@
+#!/bin/sh
+#//*****************************************************************************
+#// This file is provided under a dual BSD/LGPLv2.1 license.  When using 
+#// or redistributing this file, you may do so under either license.
+#//
+#// LGPL LICENSE SUMMARY
+#//
+#// Copyright(c) 2010-2012. Intel Corporation. All rights reserved.
+#//
+#// This program is free software; you can redistribute it and/or modify 
+#// it under the terms of version 2.1 of the GNU Lesser General Public 
+#// License as published by the Free Software Foundation.
+#//
+#// This library is distributed in the hope that it will be useful, but 
+#// WITHOUT ANY WARRANTY; without even the implied warranty of 
+#// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+#// Lesser General Public License for more details.
+#//
+#// You should have received a copy of the GNU Lesser General Public 
+#// License along with this library; if not, write to the Free Software 
+#// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
+#// USA. The full GNU Lesser General Public License is included in this 
+#// distribution in the file called LICENSE.LGPL.
+#//
+#// Contact Information:
+#//     Intel Corporation
+#//     2200 Mission College Blvd.
+#//     Santa Clara, CA  97052
+#//
+#// BSD LICENSE
+#//
+#// Copyright (c) 2010-2012. Intel Corporation. All rights reserved.
+#//
+#// Redistribution and use in source and binary forms, with or without 
+#// modification, are permitted provided that the following conditions 
+#// are met:
+#//
+#//   - Redistributions of source code must retain the above copyright 
+#//     notice, this list of conditions and the following disclaimer.
+#//   - Redistributions in binary form must reproduce the above copyright 
+#//     notice, this list of conditions and the following disclaimer in 
+#//     the documentation and/or other materials provided with the 
+#//     distribution.
+#//   - Neither the name of Intel Corporation nor the names of its 
+#//     contributors may be used to endorse or promote products derived 
+#//     from this software without specific prior written permission.
+#//
+#// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+#// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+#// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+#// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+#// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+#// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+#// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+#// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+#// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+#// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+#// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#//*****************************************************************************
+
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+. /etc/init.d/init_utilities
+
+# ARRIS CHANGE
+EMMC_PARTITION=mmcblk0p11
+# END ARRIS CHANGE
+SPI_PARTITION=mtdblock4
+EMMC_NVRAM_DEVICE=/dev/$EMMC_PARTITION
+SPI_NVRAM_DEVICE=/dev/$SPI_PARTITION
+SPI_NVRAM_CHAR_DEVICE=/dev/mtd4
+platform_config_file=/nvram/etc/platform.cfg
+
+uimage_start() {
+	if [ -e "/etc/uimage" ]; then
+		if [ ! -e "/nvram/etc/passwd" ]; then
+			mkdir -p -m 755 /nvram/etc/
+			cp -f /etc/passwd.orig /nvram/etc/passwd
+			chmod 644 /nvram/etc/passwd
+		fi
+		if [ ! -e "/nvram/etc/group" ]; then
+			mkdir -p -m 755 /nvram/etc/
+			cp -f /etc/group.orig /nvram/etc/group
+			chmod 644 /nvram/etc/group
+		fi
+		if [ ! -e "/nvram/etc/shadow" ]; then
+			mkdir -p -m 755 /nvram/etc/
+			cp -f /etc/shadow.orig /nvram/etc/shadow
+			chmod 644 /nvram/etc/shadow
+		fi
+	fi
+
+}
+
+dhclient_conf() {
+        if [ ! -e "/nvram/etc/dhclient.conf" ]; then
+                        mkdir -p -m 755 /nvram/etc/
+                        cp -f /etc/dhclient.conf /nvram/etc/dhclient.conf
+                        chmod 644 /nvram/etc/dhclient.conf
+        fi
+	if [ ! -e "/nvram/etc/dibbler_client.conf" ]; then
+			mkdir -p -m 755 /nvram/etc/
+			cp -f /etc/dibbler/client.conf /nvram/etc/dibbler_client.conf
+			chmod 644 /nvram/etc/dibbler_client.conf
+	fi
+}
+
+start_function() {
+
+    #Get the name of the SOC that is running
+    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+ 
+    if [ "$SOC_NAME" = "SOC_NAME_CE2600" ]; then
+		if [ -d /sys/class/block/$SPI_PARTITION ]; then
+		#the following will mount r/w filesystem  only platforms CE2600
+			mount -t jffs2 $SPI_NVRAM_DEVICE /nvram
+			if [ $? != 0 ]; then
+					"Please format the partition $SPI_PARTITION to jffs2 file system with flash_erase"
+					exit 1
+			fi
+			uimage_start
+			dhclient_conf
+		elif [ -d /sys/class/block/$EMMC_PARTITION ]; then
+		#the following will mount r/w filesystem  only platforms CE2600
+			fsck.ext3 -p $EMMC_NVRAM_DEVICE
+			value=$?
+			echo "The partition $EMMC_PARTITION was scan with fsck and the return value is $value"
+			case $value in
+				0|1)
+					mount -t ext3 $EMMC_NVRAM_DEVICE /nvram -o data=journal -o barrier=1
+					;;
+				2)
+					echo "System should be rebooted"
+					reboot
+					;;
+				*)
+					echo "The partition $EMMC_PARTITION need a second fsck run due to some errors"
+					fsck.ext3 -yf $EMMC_NVRAM_DEVICE
+					mount -t ext3 $EMMC_NVRAM_DEVICE /nvram -o data=journal -o barrier=1
+			esac
+			if [ $? != 0 ]; then
+				"Please format the partition $EMMC_PARTITION to ext3 file system"
+				exit 1
+			fi
+			uimage_start
+			dhclient_conf
+
+            # following will check for atom only reboot config
+            if [ -e /proc/reboot_control ]; then
+                if [ -e $platform_config_file ] ; then
+                    value=`awk -F ':' '/atom_only/ {print$2}' $platform_config_file`
+                else
+                    mkdir -p -m 755 /nvram/etc/
+                    echo "atom_only:1" > $platform_config_file
+                    value=1
+                fi
+                if [ $value = '0' ]; then
+                    echo 0 > /proc/reboot_control
+                else
+                    echo 1 > /proc/reboot_control
+                fi
+            fi
+
+		else
+			echo "Please make sure parittion $EMMC_PARTITION exist in emmc boot or partition $SPI_PARTITION exists in spi boot"
+		fi
+	fi
+}
+
+stop_function() {
+	
+    #Get the name of the SOC that is running
+    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+
+ 
+    if [ "$SOC_NAME" = "SOC_NAME_CE2600" ]; then
+        #the following will check the atom only reboot setting
+        if [ -e /proc/reboot_control ]; then
+            if [ -e $platform_config_file ] ; then
+                value=`awk -F ':' '/atom_only/ {print$2}' $platform_config_file`
+            else
+                value=0
+            fi
+            if [ $value = '0' ]; then
+                echo 0 > /proc/reboot_control
+            else
+                echo 1 > /proc/reboot_control
+            fi
+        fi
+        #the following will unmount r/w filesystem  only platforms CE2600
+		if [ -d /sys/class/block/$SPI_PARTITION ]; then
+			umount $SPI_NVRAM_DEVICE
+		elif [ -d /sys/class/block/$EMMC_PARTITION ]; then
+			umount $EMMC_NVRAM_DEVICE
+		else
+			echo "Please make sure parittion $EMMC_PARTITION exist in emmc boot or partition $SPI_PARTITION exists in spi boot"
+		fi
+	fi
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac
