@@ -1,0 +1,14 @@
+config BR2_PACKAGE_TWISTER
+	bool "Twister"
+	default n
+	help
+	  This is an unknown service which is unlikely to be needed
+	  in my environment. It opens a few holes in the router so I
+	  will remove it. Since there are two programs that can start
+	  it I will replace the original scripts with fake ones that
+	  just log the attempt to start and then exit.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+

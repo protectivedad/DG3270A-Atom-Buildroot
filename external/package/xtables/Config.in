@@ -1,0 +1,14 @@
+config BR2_PACKAGE_XTABLES
+	bool "XTables"
+	default n
+	help
+	  There seems to be something wrong. From my experience
+	  iptables/xtables, etc are required and used all over
+	  the place. But not in this image. Maybe they are in the
+	  ARM side? I am using as an internal modem anyway so I
+	  removed them.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+
