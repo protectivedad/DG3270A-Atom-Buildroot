@@ -1,0 +1,12 @@
+config BR2_PACKAGE_SEC_KERNEL
+	bool "Sec_Kernel"
+	default n
+	help
+	  This may be used during the firmware configuration after
+	  an update. I'm not sure. I removed it but may put it back
+	  when I'm in a position to test it further.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+
