@@ -1,0 +1,97 @@
+// NOTE: This layout starts at the media_base_address specified in platform config
+// Entries starting with smd_buffers* and smd_frame_buffers are processed by the SMD core, 
+// the name really doesn't matter other than the beginning, except that each entry must have a unique name.
+
+
+//name { type = <type> pmr = <pmr_identifier> size = <size> page_size = <page_size> align = <alignment> access = <accessible_value>}
+
+// { access = <accessible_value>}
+// If accessible_value equals to 1, it means this memory region is not restricted and it can be mmapped/accessed by all host processes.
+// If accessible_value equals to 0 or no access defined, it means this memory region is restricted and it can't be mmapped/accessed by any host processes.
+
+
+//----------------------------------
+//Buffers needed to install drivers/FW (~79MB)
+smd_fw_ADSPFW0               {                     size = 0x00200000 pmr = 11 align = 0x100000} // (2MB) Audio DSP Firmware and Debug 
+smd_fw_ADSPFW1               {                     size = 0x00200000 pmr = 11 align = 0x100000} // (2MB) Audio DSP Firmware and Debug
+smd_fw_VPPFW                 {                     size = 0x00020000 pmr = 4 align = 0x040000 } // (128KB) VidPProc Firmware
+smd_DMX_FW_IMAGE             {                     size = 0x00020000                 } // (128KB) Demux FW image
+//Note that Demux does not require a seperate PMR region for FW load
+smd_fw_VIDEO_CES_GV_CODE0    {                     size = 0x00040000 pmr = 4 align = 0x40000} // (256 KB) for loading Parser FW (this includes decoder or encoder FW)
+smd_fw_VIDEO_CES_GV_CODE1    {                     size = 0x00040000 pmr = 4 align = 0x40000} // (256 KB) for loading Encoder or Decoder FW (this includes Transcode Mux FW) 
+smd_fw_VIDEO_CES_MP4_NORMAL  {                     size = 0x00004000 pmr = 4 } // ( 16 KB) for loading FW MP4 normal 
+smd_fw_VIDEO_CES_MP4_DP      {                     size = 0x00004000 pmr = 4 } // (16KB)for loading FW MP4 DP 
+smd_fw_VIDEO_CES_IPC0        {                     size = 0x00004000                 } // (16KB) for Sync msg and global memory (parser and decoder or encoder)
+smd_fw_VIDEO_CES_IPC1        {                     size = 0x00004000                 } // (16KB) for Sync msg and global memory (mux and encoder or decoder)
+omar_buf                     {                     size = 0x00100000 align = 0x100000 access = 1} // (1MB) OMAR trace buffer, must be aligned to size
+sven_buf                     {                     size = 0x00100000 align = 0x100000 access = 1} // (1MB) SVEN trace buffer, must be aligned to size
+sven_hdr                     {                     size = 0x00001000 access = 1      } // (4KB) sven header buffer
+omar_hdr                     {                     size = 0x00001000 access = 1      } // (4KB) omar header buffer
+smd_VPP_BLACK                {                     size = 0x001E0000 access = 1      } // (1.6MB) VidPProc Black Border
+display_hdmi_dma             {                     size = 0x00008000 access = 1      } // (32KB) HDMI DMA Descriptors
+display                      {                     size = 0x04600000 access = 1      } // (70MB) Display Memory
+
+
+//----------------------------------
+//SMD Video Frame buffers (220MB)
+//Each buffer region is 2*1088*2*stride bytes = 8,912,896 bytes if stride is 2k
+//For 1080p, two buffers fit in one region.
+//For 720p, a 3:2 packing ratio is achieved. 
+//The region height is a configurable option, specified in platform_config.hcfg
+//
+// core->frame_buffer_properties->region_height
+//
+// 
+smd_frame_buffers            { type = "frames"     size = 0x0DC20000 access = 1      } // (220MB) used to allocate frame buffer regions, include normal, YUV, MH buffer, VC1 MBinfo & Transcoding buffers
+
+
+//----------------------------------
+//SMD linear buffers (160MB)
+//Enough for dual HD playback + dual HD transcode + 5 audio decodes
+smd_buffers_linear           { type = "linear"     size = 0x0A000000 access = 1      } // (160MB) all SMD linear buffer allocations
+
+//----------------------------------
+//TDP buffers
+
+// for FW BSS data, parser manager context ) and any other firmware data. This buffer should be multiple of 1MB.
+// With this memory atmost 3 h264 parser instances can be opened, other codecs can be opened upto 16.
+// If needed to open more than 3 h264 parser instances, increase the memory.
+// For FW data.
+smd_buffers_fw_data          { type = "linear"   size = 0x0100000 pmr = 5  align = 0x0100000 page_size = 0x40000 access = 1}
+
+//AV stream region
+smd_buffers_linear_av_stream { type = "linear"     size = 0x0100000 pmr = 6 align = 0x100000 access = 1} // ( 1MB) 2x16x32kB Two secure input streams
+
+//Compressed video region 
+smd_buffers_linear_cmp_video { type = "linear"     size = 0x1000000 pmr = 7 align = 0x100000 access = 1} // (16MB) 2x8MB. Two ES video streams
+
+
+// TOP of layout ~= 459MB + the offset assigned with media_base_address
+
+//------------------------------------------------------------------------------
+//----  SEE COMMENT BELOW FOR ENTRIES BELOW THIS POINT
+//------------------------------------------------------------------------------
+
+// The entries above define static memory regions REQUIRED by the stack.
+// Software components will query these regions using the pre-defined names in
+// the above entries when the stack is initialized.
+//
+// Additional definitions can be added for regions of memory that can be made
+// *dynamically* available (at runtime) to the display driver via the
+// gdl_attach_heap() API; this memory then becomes available for graphics
+// applications (see the documentation of the gdl_attach_heap() API for
+// details).
+//
+// It is assumed that dynamic regions will overlap the static regions defined
+// above for video playback, and that a controlling application will terminate
+// all video playback to make the memory available before starting a
+// graphics-intensive application that will call gdl_attach_heap().
+//
+// Add definitions below this point, using the same format as above; i.e.,
+//
+//    <heap_name> { size = <heap_size_in_bytes> }
+//
+// <size> must be multiples of the system page size.
+//
+// <heap_name> can be any unique arbitrary string.  It should be passed
+// to gdl_attach_heap() at runtime.

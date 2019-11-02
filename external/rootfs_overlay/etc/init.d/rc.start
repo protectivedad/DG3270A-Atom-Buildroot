@@ -1,0 +1,53 @@
+#!/bin/sh
+#-----------------------------------------------------------------------------
+# Copyright 2010-2011 Intel Corporation All Rights Reserved. 
+#
+# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#
+# This Distributable As Sample Source Software is subject to the terms and
+# conditions of the Intel Software License Agreement provided with the Intel(R)
+# Media Processor Software Development Kit.
+#-----------------------------------------------------------------------------
+
+# Setup a 'sane' umask for subprocesses which create files
+umask 0022
+
+# Global Constants
+DEFAULT_RUNLEVEL=3
+# Some sub-scripts need HOSTNAME
+export HOSTNAME=intel_ce_linux
+
+# Check for custom run level; if not set choose the default
+if [ $# -ge 1 ]; then
+    RUNLEVEL=$1;
+else
+    # Because busybox does not support run levels we won't error.
+    #echo "rc ERROR: No run level passed"
+    #exit 1
+    RUNLEVEL=$DEFAULT_RUNLEVEL
+fi
+
+# Source the user profile of enviromental variables and aliases
+. /etc/profile
+
+/sbin/insmod /lib/modules/thfsplus.ko
+/sbin/insmod /lib/modules/tntfs.ko
+# Make sure our init directory exists
+if [ -d /etc/rc$RUNLEVEL.d ]; then
+    # Need /dev populated before anything else works
+    /etc/rc$RUNLEVEL.d/system_setup start
+    /etc/rc$RUNLEVEL.d/udev start
+    # start init scripts in parallel
+    echo "##### Starting Scripts #####"
+    /etc/init.d/init_man.sh start
+    echo "##### Starting Scripts Complete ######"
+else
+    echo "rc ERROR: Init directory /etc/init.d/rc$RUNLEVEL.d does not exist"
+    exit 1
+fi
+
+# Print a few lines to provide a clean break:
+echo
+echo
+
+exit 0

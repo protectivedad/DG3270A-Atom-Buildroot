@@ -1,0 +1,139 @@
+#!/bin/sh
+#-----------------------------------------------------------------------------
+# Copyright 2010-2011 Intel Corporation All Rights Reserved. 
+#
+# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#
+# This Distributable As Sample Source Software is subject to the terms and
+# conditions of the Intel Software License Agreement provided with the Intel(R)
+# Media Processor Software Development Kit.
+#-----------------------------------------------------------------------------
+
+# if this is true use the init manager, else use sequential method
+# set this to "parallel", "sequential", or "manual"
+MODE="parallel"
+
+# Setup a 'sane' umask for subprocesses which create files
+umask 0022
+
+# Global Constants
+DEFAULT_RUNLEVEL=3
+# Some sub-scripts need HOSTNAME
+export HOSTNAME=intel_ce_linux
+
+# Check for custom run level; if not set choose the default
+if [ $# -ge 1 ]; then
+    RUNLEVEL=$1;
+else
+    # Because busybox does not support run levels we won't error.
+    #echo "rc ERROR: No run level passed"
+    #exit 1
+    RUNLEVEL=$DEFAULT_RUNLEVEL
+fi
+
+# Make sure our init directory exists
+if [ -d /etc/rc$RUNLEVEL.d ]; then
+    if [ "$MODE" == "sequential" ]; then
+        # this is a sequential shutdown mode for debugging purposes
+        # it calls init_man to determine a valid shutdown sequence
+        # that does not use the parallel algorith, them iterates
+        # through the sequence. This is a replacement for the old
+        # method of cycling through the K* scripts.
+echo "************************************************************************"
+echo " DEBUG DBEUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG"
+echo ""
+echo "                      Sequential Shutdown Mode"
+echo ""
+echo "  /bin/init_man will determine a valid non-parallel shutdown sequence"
+echo ""
+echo " DEBUG DBEUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG"
+echo "************************************************************************"
+        SEQUENCE=`/bin/init_man -l seqstop`
+        echo "##### Stopping Scripts #####"
+        for THIS_SCRIPT in $SEQUENCE
+        do
+            if [ -f /etc/rc3.d/$THIS_SCRIPT ]; then
+                /etc/rc3.d/$THIS_SCRIPT stop
+                RET_VAL=$?
+                if [ $RET_VAL -eq 0 ]; then
+                    echo "$THIS_SCRIPT COMPLETE"
+                else
+echo "************************************************************************"
+echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"
+echo ""
+echo " $THIS_SCRIPT FAILED [returned: $RET_VAL]"
+echo " Failed stop scripts will not terminate the init system."
+echo " Continuing to the next script."
+echo ""
+echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"
+echo "************************************************************************"
+                fi
+            else
+                echo "*** /etc/rc3.d/$THIS_SCRIPT not found, skipping"
+            fi
+        done
+        echo "##### Stopping Scripts Complete ######"
+    elif [ "$MODE" == "manual" ]; then
+        # Manual Shutdown -- this is the original method of iterating 
+        # through the /etc/rc3.d/K* scripts. This sequence is no longer
+        # maintained but may be of interest for debugging
+echo "************************************************************************"
+echo " DEBUG DBEUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG"
+echo ""
+echo "                      Manual Shutdown Mode"
+echo ""
+echo "   Scripts in the /etc/rc3.d/K* will be executed in alphabetical order"
+echo ""
+echo " DEBUG DBEUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG"
+echo "************************************************************************"
+        # Call 'stop' on all processes which start with a K
+        if [ -n "`ls /etc/rc$RUNLEVEL.d/K* 2>/dev/null`" ]; then
+            echo "##### Stopping Scripts #####"
+            for THIS_SCRIPT in /etc/rc$RUNLEVEL.d/K*
+            do
+                $THIS_SCRIPT stop
+                RET_VAL=$?
+                if [ $RET_VAL -eq 0 ]; then
+                    echo "$THIS_SCRIPT COMPLETE"
+                else
+echo "************************************************************************"
+echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"
+echo ""
+echo " $THIS_SCRIPT FAILED [returned: $RET_VAL]"
+echo " Failed stop scripts will not terminate the init system."
+echo " Continuing to the next script."
+echo ""
+echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"
+echo "************************************************************************"
+                fi
+            done
+            echo "##### Stopping Scripts Complete ######"
+        else
+            echo "##### no /etc/rc$RUNLEVEL.d/K* shutdown scripts exist #####"
+        fi
+    else
+        # Normal shutdown mode using the parallel algorithm
+        if [ "$MODE" != "parallel" ]; then
+echo "************************************************************************"
+echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"
+echo ""
+echo " Unknown 'MODE' variable in $0"
+echo " Defaulting to parallel init_man shutdown"
+echo ""
+echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"
+echo "************************************************************************"
+        fi
+        echo "##### Stopping Scripts #####"
+        /etc/init.d/init_man.sh stop
+        echo "##### Stopping Scripts Complete ######"
+    fi
+else
+    echo "rc ERROR: Init directory /etc/init.d/rc$RUNLEVEL.d does not exist"
+    exit 1
+fi
+
+# Print a few lines to provide a clean break:
+echo
+echo
+
+exit 0

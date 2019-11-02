@@ -1,0 +1,73 @@
+#!/bin/sh
+
+#-----------------------------------------------------------------------------
+# Copyright (c) 2006-2013 Intel Corporation
+#
+# DISTRIBUTABLE AS SAMPLE SOURCE SOFTWARE
+#
+# This Distributable As Sample Source Software is subject to the terms and
+# conditions of the Intel Software License Agreement provided with the Intel(R)
+# Media Processor Software Development Kit.
+#-----------------------------------------------------------------------------
+
+# This script is an *EXAMPLE* of how to load the SFAF Firmware
+# Under normal operation, firmware loading would probably take place in 
+# the system startup script /etc/init.d/rcS
+#
+
+# Script name can be the called name, or something more meaningful.
+SCRIPTNAME=$0
+PATH=/usr/local/bin:/usr/bin:/bin
+
+. /etc/init.d/init_utilities
+
+start_function() {
+    # load and initialize SFAF firmware
+    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
+    SOC_STEPPING=`get_soc_info_utility STEPPING STRING 2>/dev/null`
+    PLATFORM_NAME=`get_board_info_utility BOARD_TYPE 2>/dev/null`    
+    case "$SOC_NAME" in 
+        "SOC_NAME_CE2600" | \
+        "SOC_NAME_CE4200" | \
+        "SOC_NAME_CE5300" )
+		if [ $PLATFORM_NAME == "CE2600_BOARD_HPMG"  ] ; then
+            if [ ! -z "`ls /lib/firmware/sec/sec_fw_1200* 2>/dev/null`" ]; then
+                echo "Loading 1200 firmware"
+                sec_fw_load /lib/firmware/sec/sec_fw_1200
+            fi
+            if [ ! -z "`ls /lib/firmware/sec/sec_fw_1100* 2>/dev/null`" ]; then
+                echo "Loading 1100 firmware"
+                sec_fw_load /lib/firmware/sec/sec_fw_1100
+            fi
+            if [ ! -z "`ls /lib/firmware/sec/sec_fw_manifest* 2>/dev/null`" ]; then
+                echo "Loading file manifest"
+                sec_fw_load -m /lib/firmware/sec/sec_fw_manifest
+            fi
+        fi
+    esac
+
+    return 0
+}
+
+stop_function() {
+    # Terminate daemons, remove modules, remove device nodes here
+    
+    # Leave the following command in until this function is implemented
+    echo "This command prevents an error" > /dev/null
+}
+
+case $1 in
+    "start")
+        start_function
+        ;;
+    "stop")
+        stop_function
+        ;;
+    "restart")
+        stop_function
+        start_function
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac
+
