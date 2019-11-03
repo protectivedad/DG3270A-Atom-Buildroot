@@ -4,13 +4,15 @@ ROOTFS=$1
 
 cd ${ROOTFS}
 
+rm_links='lib32 usr/lib32'
 # Remove unneeded links.
-for link in "lib32 usr/lib32"; do
+for link in ${rm_links}; do
     [[ -L ${link} ]] && rm ${link} || true
 done
 
+rm_dirs='media/ opt/ run/'
 # Remove directories that are not used.
-for dir in "media/ opt/ run/"; do
+for dir in ${rm_dirs}; do
     [[ -d ${dir} ]] && rmdir ${dir} || true
 done
 
