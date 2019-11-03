@@ -1,0 +1,4 @@
+export BR2_EXTERNAL=${PROJ_DIR}/external
+export PROJ_DL_DIR=${PROJ_DIR}/dl
+BR_DIR=buildroot
+PERL_MM_OPT=
