@@ -1,3 +1,45 @@
+if BR2_PACKAGE_HOSTAPD
+
+menu "Hostapd overrides"
+
+config BR2_PACKAGE_HOSTAPD_QCA988X
+	bool "Override Hostapd for Atheros QCA988x"
+	default y
+	help
+	  This will override the Hostapd config options
+	  to make Atheros the only driver available.
+
+config BR2_PACKAGE_HOSTAPD_HIDEDEBUG
+	bool "Disable DEBUG"
+	default n
+	help
+	  Remove support standard debug messages.
+
+endmenu
+
+endif
+
+if BR2_PACKAGE_WPA_SUPPLICANT
+
+menu "WPA_Supplicant overrides"
+
+config BR2_PACKAGE_WPA_SUPPLICANT_QCA988X
+	bool "Override WPA_Supplicant for Atheros QCA988x"
+	default y
+	help
+	  This will override the WPA_Supplicant config
+	  options to make WEXT the only driver available.
+
+config BR2_PACKAGE_WPA_SUPPLICANT_HIDEDEBUG
+	bool "Disable DEBUG"
+	default n
+	help
+	  Remove support standard debug messages.
+
+endmenu
+
+endif
+
 source "$BR2_EXTERNAL/package/twister/Config.in"
 source "$BR2_EXTERNAL/package/xtables/Config.in"
 source "$BR2_EXTERNAL/package/sec_kernel/Config.in"
