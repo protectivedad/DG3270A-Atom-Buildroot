@@ -28,6 +28,9 @@ $(BR_DIR)/Makefile: $(PROJ_DL_DIR)/$(BUILDROOT_SRC)
 	tar -xf ${PROJ_DL_DIR}/${BUILDROOT_SRC} \
 	   -C ${BR_DIR} \
 	   --strip-components=1 --keep-old-files 2>/dev/null
+	for patch in ${BR2_EXTERNAL}/patches/buildroot; do \
+	   patch -p1 -d ${BR_DIR} <${patch} \
+	done
 	touch ${BR_DIR}/Makefile
 
 $(BR_DIR)/.config: $(BR_DIR)/Makefile
