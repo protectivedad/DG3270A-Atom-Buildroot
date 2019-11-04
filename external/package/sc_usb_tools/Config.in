@@ -1,0 +1,12 @@
+config BR2_PACKAGE_SC_USB_TOOLS
+	bool "ScUsbTools"
+	default n
+	help
+	  Set of tools that seem to communicate through the USB.
+	  They include and old SMB1, bftpd and dlna applications.
+	  Can't see a need for them so I removed them.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+
