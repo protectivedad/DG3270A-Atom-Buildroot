@@ -42,6 +42,10 @@ busybox-mergeconfig:
 
 prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/.config $(PROJ_DL_DIR)/$(GLIBC_SRC)
 
+linux-savedefconfig: prep
+	make -C ${BR_DIR} $@
+	cp -a ${BR_DIR}/output/build/linux-2.6.39/.config ${BR2_EXTERNAL}/configs/atom_defconfig
+
 clean:
 	git clean -dXf .
 
