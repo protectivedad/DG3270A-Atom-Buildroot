@@ -34,17 +34,25 @@ $(BR_DIR)/Makefile: $(PROJ_DL_DIR)/$(BUILDROOT_SRC)
 	touch ${BR_DIR}/Makefile
 
 $(BR_DIR)/.config: $(BR_DIR)/Makefile
-	make -C ${BR_DIR} dg3270a_defconfig
+	make -C ${BR_DIR} buildroot_defconfig
 	touch ${BR_DIR}/.config
 
 busybox-mergeconfig:
-	meld ${BR_DIR}/output/build/busybox-1.24.1/.config ${BR2_EXTERNAL}/package/busybox/busybox.config
+	meld ${BR_DIR}/output/build/busybox-1.24.1/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
 prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/.config $(PROJ_DL_DIR)/$(GLIBC_SRC)
 
-linux-savedefconfig: prep
+saveconfigs:
+	cd ${BR_DIR}; make savedefconfig
+	make busybox-savedefconfig
+	make linux-savedefconfig
+
+busybox-savedefconfig: ${BR_DIR}/output/build/busybox-1.24.1/.config
+	cp ${BR_DIR}/output/build/busybox-1.24.1/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
+
+linux-savedefconfig: ${BR_DIR}/output/build/linux-2.6.39/.config
 	make -C ${BR_DIR} $@
-	cp -a ${BR_DIR}/output/build/linux-2.6.39/.config ${BR2_EXTERNAL}/configs/atom_defconfig
+	cp -a ${BR_DIR}/output/build/linux-2.6.39/.config ${BR2_EXTERNAL}/configs/linux_defconfig
 
 clean:
 	git clean -dXf .
