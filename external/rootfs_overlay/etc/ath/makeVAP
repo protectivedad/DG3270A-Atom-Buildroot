@@ -198,7 +198,7 @@ if [ "$AP_ENABLE_TX99" = "y" ]; then
     exit
 fi
 
-echo Creating ${MODE} for "${ESSID}" on ${BRIDGE}
+echo "Creating ${MODE} for ${ESSID} on ${BRIDGE}"
 
 ##
 ## Create the instance

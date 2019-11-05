@@ -22,7 +22,11 @@ for link in ${fake_files}; do
    [[ ! -e $link ]] && ln -sr etc/log_attempt.sh ${link}
 done
 
+# Remove ld config files
 rm etc/ld.so.conf
+
+# Remove modprobe files but keep modules
+rm `find lib/modules -name "modules.*"`
 
 exit 0
 
