@@ -116,11 +116,6 @@ start_function() {
         debug_print "No WIFI devices installed"
     fi
 
-    # Give the WLAN RPC server some time to initialize as needed 
-    if [ $(rpcinfo -p | cut -d ' ' -f2 | grep -c ^538121015) -eq 0 ]; then    
-        sleep 3
-    fi
-
 }
 
 stop_function() {

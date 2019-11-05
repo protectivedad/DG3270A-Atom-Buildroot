@@ -6,16 +6,6 @@ SCRIPTNAME=$0
 . /etc/init.d/init_utilities
 
 start_function() {
-	# Wait for br0 to come up
-	br0Configured=$(ifconfig br0 | grep HWaddr)
-	while [[ -z "$br0Configured" ]]
-	do
-		sleep 1
-		br0Configured=$(ifconfig br0 | grep HWaddr)
-	done
-	ifconfig br0:0
-	udhcpc -i br0:0
-
 	try_command dropbear -E -r /etc/dropbear_rsa_key
 }
 
