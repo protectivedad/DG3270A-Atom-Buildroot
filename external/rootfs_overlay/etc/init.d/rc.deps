@@ -1,35 +1,20 @@
-avcap_ce4X00 avcap_core intel_ce_pm smd
-avcap_core osal platform_config
-avcap_rx_ce avcap_ce4X00 sec
-avcap_si avcap_ce4X00
 bootparams platform_config
-clock_control idl sven
 dibbler
 devmem pal platform_config
 dhcpv6
-dhsauto_init rpc_management_srv_init
-directfb display graphics graphics_2d intel_ce_pm
-display gentimer intel_ce_pm system_utils
 edl idl system_utils
 en2510_start psb6973_start
 expbus system_utils
 flashtool osal platform_config
 gentimer smd_core
 gpio osal pal
-graphics display intel_ce_pm
-graphics_2d osal platform_config
-hdmi display sec
 hl_start idl
-icepm_gateway intel_ce_pm rpc_management_srv_init
 idl gpio pal
-inetd network
 init_iosf system_utils
-init_pic_uart intel_ce_pm
 init_punit_fw_upgrade init_iosf pal
 init_punit_fw_upgrade_notification init_punit_fw_upgrade rpc_management_srv_init
 init_pwm system_utils
 init_watchdog system_utils
-intel_ce_pm clock_control init_iosf pal osal
 kernel
 libvirt network system_utils
 network rpc_ifconfig_init
@@ -45,17 +30,11 @@ rpc_management_srv_init nvram portmap_init
 arris_rpc_srv_init portmap_init
 arris_wlan_rpc_init portmap_init
 arris_event_init network
-runtime_pm avcap_ce4X00 avcap_rx_ce display graphics graphics_2d hdmi intel_ce_pm sec smd
-dlna network nvram
 ftp network nvram
-sec clock_control init_iosf intel_ce_pm system_utils
-sec_fw_1100 sec
-smd avcap_core display intel_ce_pm smd_core
-smd_avcap_shim avcap_core smd
-smd_core clock_control init_iosf intel_ce_pm sec system_utils
+clock_control idl sven init_iosf system_utils
 sven osal platform_config
 system_utils osal platform_config
 dropbear nvram
 thermal osal pal
 wifi
-rpc_up_and_running rpc_management_srv_init dhsauto_init arris_rpc_srv_init arris_wlan_rpc_init
+rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init
