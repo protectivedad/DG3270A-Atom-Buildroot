@@ -22,5 +22,7 @@ for link in ${fake_files}; do
    [[ ! -e $link ]] && ln -sr etc/log_attempt.sh ${link}
 done
 
+rm etc/ld.so.conf
+
 exit 0
 
