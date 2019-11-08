@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux/i386 2.6.39 Kernel Configuration
-# Wed Nov  6 17:37:56 2019
+# Thu Nov  7 15:01:02 2019
 #
 # CONFIG_64BIT is not set
 CONFIG_X86_32=y
@@ -1845,9 +1845,7 @@ CONFIG_FB_TILEBLITTING=y
 #
 # Console display driver support
 #
-CONFIG_VGA_CONSOLE=y
-CONFIG_VGACON_SOFT_SCROLLBACK=y
-CONFIG_VGACON_SOFT_SCROLLBACK_SIZE=64
+# CONFIG_VGA_CONSOLE is not set
 CONFIG_DUMMY_CONSOLE=y
 # CONFIG_FRAMEBUFFER_CONSOLE is not set
 # CONFIG_LOGO is not set
