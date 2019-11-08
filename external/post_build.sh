@@ -28,5 +28,12 @@ rm etc/ld.so.conf
 # Remove modprobe files but keep modules
 rm `find lib/modules -name "modules.*"`
 
+# Remove xfs executables only want fsck.xfs and mkfs.xfs
+rm `find ./ -name "xfs_*"`
+
+# Clearout var and tmp directories.
+cd var && rm -rf . && cd ..
+cd tmp && rm -rf . && cd ..
+
 exit 0
 
