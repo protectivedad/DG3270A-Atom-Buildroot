@@ -1,0 +1,14 @@
+config BR2_PACKAGE_THERMAL
+	bool "Thermal"
+	default n
+	help
+	  Kernel module and tools that monitor the temperature of
+	  the CPU. They are referenced in a few executables but 
+	  don't seem to be executed. If this package isn't included
+	  then scripts are linked that log attepted access to the
+	  utilities. I have removed them by default.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+

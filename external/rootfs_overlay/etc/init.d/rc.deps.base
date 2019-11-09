@@ -35,6 +35,5 @@ clock_control idl sven init_iosf system_utils
 sven osal platform_config
 system_utils osal platform_config
 dropbear nvram
-thermal osal pal
 wifi
 rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init
