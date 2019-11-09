@@ -35,5 +35,15 @@ rm `find ./ -name "xfs_*"`
 cd var && rm -rf . && cd ..
 cd tmp && rm -rf . && cd ..
 
+rc_deps=${ROOTFS}/etc/init.d/rc.deps
+# Setup rc.deps and merge any rc.deps that exist.
+if [ ! -f ${rc_deps} ]; then
+	touch ${rc_deps}
+fi
+for dep_file in ${rc_deps}.*; do
+	cat ${dep_file} >>${rc_deps}
+	rm ${dep_file}
+done
+
 exit 0
 
