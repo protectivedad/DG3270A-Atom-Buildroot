@@ -17,7 +17,9 @@ for dir in ${rm_dirs}; do
 done
 
 # Conditional links
-fake_files='etc/mdc_start.sh etc/run_script etc/run_script_ct'
+fake_files='etc/mdc_start.sh etc/run_script etc/run_script_ct \
+	bin/thermal usr/sbin/hotMonitorStartScript.sh usr/sbin/hot_monitor'
+
 for link in ${fake_files}; do
    [[ ! -e $link ]] && ln -sr etc/log_attempt.sh ${link}
 done
