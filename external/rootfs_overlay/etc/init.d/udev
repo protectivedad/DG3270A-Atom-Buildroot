@@ -34,7 +34,7 @@
 
 # Script name can be the called name, or something more meaningful.
 SCRIPTNAME=$0
-PATH=/usr/local/bin:/usr/bin:/bin:/sbin
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
 

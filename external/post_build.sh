@@ -17,7 +17,7 @@ for dir in ${rm_dirs}; do
 done
 
 # Conditional links
-fake_files='etc/mdc_start.sh etc/run_script etc/run_script_ct \
+fake_files='etc/mdc_start.sh etc/run_script etc/run_script_ct
 	bin/thermal usr/sbin/hotMonitorStartScript.sh usr/sbin/hot_monitor'
 
 for link in ${fake_files}; do
@@ -39,9 +39,7 @@ cd tmp && rm -rf . && cd ..
 
 rc_deps=${ROOTFS}/etc/init.d/rc.deps
 # Setup rc.deps and merge any rc.deps that exist.
-if [ ! -f ${rc_deps} ]; then
-	touch ${rc_deps}
-fi
+[ ! -f ${rc_deps} ] && mv ${rc_deps}.base ${rc_deps} || rm ${rc_deps}.base
 for dep_file in ${rc_deps}.*; do
 	cat ${dep_file} >>${rc_deps}
 	rm ${dep_file}
