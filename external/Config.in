@@ -24,7 +24,7 @@ if BR2_PACKAGE_WPA_SUPPLICANT
 menu "WPA_Supplicant overrides"
 
 config BR2_PACKAGE_WPA_SUPPLICANT_QCA988X
-	bool "Override WPA_Supplicant for Atheros QCA988x"
+	bool "Override WPA_Supplicant w/only WEXT"
 	default y
 	help
 	  This will override the WPA_Supplicant config
@@ -45,4 +45,5 @@ source "$BR2_EXTERNAL/package/xtables/Config.in"
 source "$BR2_EXTERNAL/package/sec_kernel/Config.in"
 source "$BR2_EXTERNAL/package/sc_usb_tools/Config.in"
 source "$BR2_EXTERNAL/package/thermal/Config.in"
+source "$BR2_EXTERNAL/package/old_udev/Config.in"
 

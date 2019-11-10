@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux/i386 2.6.39 Kernel Configuration
-# Sat Nov  9 19:16:33 2019
+# Sun Nov 10 00:40:55 2019
 #
 # CONFIG_64BIT is not set
 CONFIG_X86_32=y

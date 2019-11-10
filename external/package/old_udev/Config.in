@@ -1,0 +1,6 @@
+config BR2_PACKAGE_OLD_UDEV
+	bool "UDev"
+	default y
+	help
+	  Old udev 175 package
+
