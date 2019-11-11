@@ -1,0 +1,12 @@
+config BR2_PACKAGE_INTEL_CE_PM
+	bool "Intel CE Power Management"
+	default n
+	help
+	  Binaries and scripots of the various power management
+	  tools that seem to deal primarily with hardware not
+	  found on the CE2600 so these have been removed.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+

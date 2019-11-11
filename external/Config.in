@@ -48,4 +48,5 @@ source "$BR2_EXTERNAL/package/thermal/Config.in"
 source "$BR2_EXTERNAL/package/old_udev/Config.in"
 source "$BR2_EXTERNAL/package/dibbler/Config.in"
 source "$BR2_EXTERNAL/package/arris_clients/Config.in"
+source "$BR2_EXTERNAL/package/intel_ce_pm/Config.in"
 
