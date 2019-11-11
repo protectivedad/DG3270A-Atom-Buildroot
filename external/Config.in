@@ -46,4 +46,5 @@ source "$BR2_EXTERNAL/package/sec_kernel/Config.in"
 source "$BR2_EXTERNAL/package/sc_usb_tools/Config.in"
 source "$BR2_EXTERNAL/package/thermal/Config.in"
 source "$BR2_EXTERNAL/package/old_udev/Config.in"
+source "$BR2_EXTERNAL/package/dibbler/Config.in"
 

@@ -1,0 +1,14 @@
+config BR2_PACKAGE_DIBBLER
+	bool "Dibbler DHCPv6"
+	default n
+	help
+	  Binaries of the dibbler installed on the router. I may
+	  switch over to the source code if I use it. It can be
+	  found at: http://klub.com.pl/dhcpv6/.
+
+	  Since I've removed it, it is not an issure.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+
