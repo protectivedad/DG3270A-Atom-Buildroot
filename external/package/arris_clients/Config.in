@@ -1,0 +1,12 @@
+config BR2_PACKAGE_ARRIS_CLIENTS
+	bool "Misc CLI files"
+	default n
+	help
+	  Binaries of the various _cli executables that give
+	  remote and local access to the router. I use ssh so
+	  these have been removed.
+
+	  If instead you want to include the package say yes here.
+
+	  Most people should answer N.
+
