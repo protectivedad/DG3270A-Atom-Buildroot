@@ -1,0 +1,15 @@
+config BR2_PACKAGE_WDT
+	bool "Intel CE Watchdog Modules/Userspace"
+	select BR2_PACKAGE_WDT
+	default n
+	help
+	  Kernel modules and userpace programs for
+	  watchdog from the router.
+
+	  Intel CE Watchdog
+	  =================
+	  Files tagged:
+	  $(find . -regextype sed -regex ".*\(watchdog\|ce_wdt\).*" ! -regex "./sbin/.*")
+
+	  Most people should answer N.
+
