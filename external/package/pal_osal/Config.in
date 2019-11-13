@@ -1,0 +1,18 @@
+config BR2_PACKAGE_PAL_OSAL
+	bool "Abstraction Layers"
+	default y
+	help
+	  Kernel modules and tools for the abstraction layers. They
+	  are used by almost all the scripts and packages for
+	  comminucating with the platform and OS.
+
+	  Abstraction Layers
+	  ==================
+	  osal - Operating System Abstraction Layer - provide os_* symbols
+	  pal - Platform Abstraction Layer - provides pal_* symbols
+
+	  Files tagged:
+	  $((find -name '*osal*'; find -name '*pal*'; find -name 'get_*') | sort -u)
+
+	  Most people should answer Y.
+

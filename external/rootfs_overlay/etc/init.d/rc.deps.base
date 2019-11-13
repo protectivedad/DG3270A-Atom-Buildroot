@@ -1,39 +1,13 @@
-bootparams platform_config
-dibbler
-devmem pal platform_config
-dhcpv6
-edl idl system_utils
-en2510_start psb6973_start
-expbus system_utils
-flashtool osal platform_config
-gentimer smd_core
-gpio osal pal
-hl_start idl
-idl gpio pal
-init_iosf system_utils
-init_punit_fw_upgrade init_iosf pal
-init_punit_fw_upgrade_notification init_punit_fw_upgrade rpc_management_srv_init
-init_pwm system_utils
-init_watchdog system_utils
 kernel
-libvirt network system_utils
 network rpc_ifconfig_init
-nvram osal pal platform_config
-osal devmem
-pal
-platform_config pal
+nvram
 portmap_init nvram rpc_ifconfig_init
-psb6973_start hl_start
-qemu_kvm kernel system_utils
 rpc_ifconfig_init nvram
 rpc_management_srv_init nvram portmap_init
+arris_event_init network
+dropbear network nvram
+wifi
 arris_rpc_srv_init portmap_init
 arris_wlan_rpc_init portmap_init
-arris_event_init network
-ftp network nvram
-clock_control idl sven init_iosf system_utils
-sven osal platform_config
-system_utils osal platform_config
-dropbear nvram
-wifi
 rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init
+
