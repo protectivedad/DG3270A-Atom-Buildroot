@@ -1,0 +1,18 @@
+config BR2_PACKAGE_GPIO
+	bool "IDL GPIO Modules/Userspace"
+	select BR2_PACKAGE_PAL_OSAL
+	default y
+	help
+	  Kernel modules and tools for the IDL GPIO. They are
+	  used by arris_wlan_rpc_server and until I can get
+	  rid of it they must be installed for a smooth start.
+	  Note they do not require IDL to be installed in fact
+	  IDL requires them. Includes WPS_GPIO for now.
+
+	  IDL GPIO
+	  ========
+	  Files tagged:
+	  $(find -name '*gpio*')
+
+	  Most people should answer Y.
+
