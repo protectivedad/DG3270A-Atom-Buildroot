@@ -1,0 +1,14 @@
+config BR2_PACKAGE_BOOTPARAMS
+	bool "Kernel Module to Upgrade P-Unit Firmware"
+	select BR2_PACKAGE_IOSF
+	select BR2_PACKAGE_PAL_OSAL
+	select BR2_PACKAGE_DTS
+	default n
+	help
+	  Kernel Module to Upgrade P-Unit Firmware.
+
+	  Files tagged:
+	  $(find -name '*punit*')
+
+	  Most people should answer N.
+

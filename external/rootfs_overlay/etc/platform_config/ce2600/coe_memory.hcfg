@@ -1,3 +1,0 @@
-// Base address of the DDR used by the NP CPU in the App CPU's address space.
-// This is sould match the DOCSIS DDR values programmed in CEFDK settings.
-platform.memory.layout.coe { base = 0x34000000 size  = 0xC400000 access = 1} //(196Mb)

@@ -1,0 +1,15 @@
+config BR2_PACKAGE_SYSTEM_UTILS
+	bool "System Utilities Module/Library"
+	select BR2_PACKAGE_PLATFORM_CONFIG
+	default n
+	help
+	  Kernel module and userpace library that provides
+	  various system utilities.
+
+	  System Utilities
+	  ================
+	  Files tagged:
+	  $(find -name '*system_utils*')
+
+	  Most people should answer N.
+

@@ -1,0 +1,11 @@
+config BR2_PACKAGE_BOOTPARAMS
+	bool "PWM Device Driver"
+	default n
+	help
+	  Kernel module.
+
+	  Files tagged:
+	  $(find -name '*pwm*')
+
+	  Most people should answer N.
+

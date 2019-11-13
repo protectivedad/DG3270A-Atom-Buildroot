@@ -1,0 +1,13 @@
+config BR2_PACKAGE_IDL
+	bool "IDL"
+	select BR2_PACKAGE_GPIO
+	select BR2_PACKAGE_PAL_OSAL
+	default n
+	help
+	  IDL
+
+	  Files tagged:
+	  $(find . -regextype sed -regex ".*\(spi\|i2c\|idl\).*" ! -regex ".*gpio.*" ! -regex "./dev.*" ! -regex "./usr/sbin/.*")
+
+	  Most people should answer N.
+

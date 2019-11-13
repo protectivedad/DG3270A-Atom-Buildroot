@@ -18,7 +18,7 @@ endef
 
 define PAL_OSAL_INSTALL_TARGET_CMDS
 	cd $(@D); for file in `find -L . -type f -not -path '*/.*'`; do \
-	   [ ! -d $$(dirname $$file) ] && mkdir -p $$(dirname $$file) || true; \
+	   [ ! -d $(TARGET_DIR)/$$(dirname $$file) ] && mkdir -p $(TARGET_DIR)/$$(dirname $$file) || true; \
 	   cp -af $(@D)/$$file $(TARGET_DIR)/$$file; \
 	done
 endef

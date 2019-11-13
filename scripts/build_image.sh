@@ -11,7 +11,7 @@
 #       dl/         - Download directory
 #
 
-PROJ_DIR=$(pwd)
+export PROJ_DIR=$(pwd)
 
 . ${PROJ_DIR}/definitions
 

@@ -1,6 +1,5 @@
 config BR2_PACKAGE_WDT
 	bool "Intel CE Watchdog Modules/Userspace"
-	select BR2_PACKAGE_WDT
 	default n
 	help
 	  Kernel modules and userpace programs for

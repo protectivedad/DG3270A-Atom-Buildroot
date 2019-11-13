@@ -1,0 +1,26 @@
+config BR2_PACKAGE_ATHEROS
+	bool "Atheros Wifi"
+	select BR2_PACKAGE_WIRELESS_TOOLS
+	default y
+	help
+	  Binaries and scripts to run the Atheros
+	  wifi.
+	  Atheros Wifi
+	  uses: iwconfig
+
+	  Files tagged:
+	  Atheros Scripts
+	  ./etc/ath
+	  ./etc/rc.d/rc.wlan
+	  Atheros Kernel Modules
+	  ./lib/modules/2.6.39/net
+	  Atheros Firmware
+	  ./lib/firmware/AR9888
+	  Atheros Tools and Libraries
+	   libhyficommon.so libwpa_client.so
+	   80211stats apstats athadhoc athdiag athstats athstatsclr
+	   cfg lbd lbt pktlogconf pktlogdump radartool spectraltool
+	   tx99tool_bin wifitool wlanconfig wnm-app radstat wps_gpio
+
+	  Most people should answer Y.
+

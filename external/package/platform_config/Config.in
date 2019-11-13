@@ -1,0 +1,17 @@
+config BR2_PACKAGE_PLATFORM_CONFIG
+	bool "Platform Configuration Device Driver"
+	select BR2_PACKAGE_PAL_OSAL
+	default n
+	help
+	  Required for updating emmc through the utilities.
+	  Otherwise unneeded and may allow remote over writing.
+
+	  Platform Config
+	  ===============
+	   ->Abstraction Layers
+	  platform_config - Platform Configuration Device Driver - provides config_* symbols
+	  Files tagged:
+	  $(find -name '*platform_config*') ./bin/config_pmrs
+
+	  Most people should answer N.
+

@@ -1,0 +1,15 @@
+config BR2_PACKAGE_DEVMEM
+	bool "DEVMEM Device Driver"
+	select BR2_PACKAGE_PLATFORM_CONFIG
+	default n
+	help
+	  Kernel module that creates a /dev/devmem.
+
+	  DEVMEM Device Driver
+	  ====================
+	  provides devh_* symbols
+	  Files tagged:
+	  $(find -name '*devmem*')
+
+	  Most people should answer N.
+

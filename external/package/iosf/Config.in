@@ -1,0 +1,14 @@
+config BR2_PACKAGE_IOSF
+	bool "Intel CE IOSF Module"
+	default n
+	help
+	  Kernel module with unknown purpose.
+
+	  IOSF
+	  ====
+	  Files tagged:
+	  $(find -name '*iosf*')
+	  iosf - provides iosf_* symbols
+
+	  Most people should answer N.
+

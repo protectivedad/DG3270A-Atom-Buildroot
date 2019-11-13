@@ -1,0 +1,11 @@
+config BR2_PACKAGE_HNC
+	bool "Arris HNC"
+	default n
+	help
+	  HNC
+	  ===
+	  Files tagged:
+	  $(egrep -Rl 'libacm|libhnc|HncInit|rpc_hnc|hnc_rpc' . 2>/dev/null) ./usr/sbin/config
+
+	  Most people should answer N.
+

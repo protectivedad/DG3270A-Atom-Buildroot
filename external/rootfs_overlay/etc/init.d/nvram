@@ -109,10 +109,6 @@ dhclient_conf() {
 
 start_function() {
 
-    #Get the name of the SOC that is running
-    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
- 
-    if [ "$SOC_NAME" = "SOC_NAME_CE2600" ]; then
 		if [ -d /sys/class/block/$SPI_PARTITION ]; then
 		#the following will mount r/w filesystem  only platforms CE2600
 			mount -t jffs2 $SPI_NVRAM_DEVICE /nvram
@@ -166,16 +162,10 @@ start_function() {
 		else
 			echo "Please make sure parittion $EMMC_PARTITION exist in emmc boot or partition $SPI_PARTITION exists in spi boot"
 		fi
-	fi
 }
 
 stop_function() {
 	
-    #Get the name of the SOC that is running
-    SOC_NAME=`get_soc_info_utility NAME STRING 2>/dev/null`
-
- 
-    if [ "$SOC_NAME" = "SOC_NAME_CE2600" ]; then
         #the following will check the atom only reboot setting
         if [ -e /proc/reboot_control ]; then
             if [ -e $platform_config_file ] ; then
@@ -197,7 +187,6 @@ stop_function() {
 		else
 			echo "Please make sure parittion $EMMC_PARTITION exist in emmc boot or partition $SPI_PARTITION exists in spi boot"
 		fi
-	fi
 }
 
 case $1 in

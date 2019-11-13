@@ -1,0 +1,14 @@
+config BR2_PACKAGE_BOOTPARAMS
+	bool "Intel CE Bootparams Module"
+	default n
+	help
+	  Kernel module that creates a /proc/bootparams
+	  file with various information in it.
+
+	  Core bootparams
+	  ===============
+	  Files tagged:
+	  $(find . -regextype sed -regex ".*bootparams.*" ! -regex "./sbin/.*")	  Intel CE Watchdog
+
+	  Most people should answer N.
+

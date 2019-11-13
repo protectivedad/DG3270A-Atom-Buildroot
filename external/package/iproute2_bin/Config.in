@@ -1,0 +1,9 @@
+config BR2_PACKAGE_IPROUTE2_BIN
+	bool "IPROUTE2 Binary Files"
+	default n
+	help
+	  Files tagged:
+	  $(fgrep -Rl 'iproute2-ss|041002' 2>/dev/null) ./usr/lib/tc ./sbin/ifcfg ./sbin/routef ./sbin/routel ./sbin/rtpr
+
+	  Most people should answer N.
+

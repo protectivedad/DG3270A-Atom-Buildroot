@@ -1,5 +1,6 @@
 config BR2_PACKAGE_ARRIS_CLIENTS
 	bool "Misc CLI files"
+	select BR2_PACKAGE_BOOTPARAMS
 	default n
 	help
 	  Binaries of the various _cli executables that give

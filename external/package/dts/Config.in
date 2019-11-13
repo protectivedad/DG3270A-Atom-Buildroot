@@ -1,0 +1,14 @@
+config BR2_PACKAGE_DTS
+	bool "Intel CE Diagnostic Test Suite"
+	select BR2_PACKAGE_PAL_OSAL
+	select BR2_PACKAGE_DEVMEM
+	default n
+	help
+	  Suite of tools to upgrade and get information
+	  on the current firmware.
+
+	  Files tagged:
+	  /usr/dtsbin
+
+	  Most people should answer N.
+

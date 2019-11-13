@@ -1,0 +1,11 @@
+config BR2_PACKAGE_SVEN
+	bool "System Visible Event Nexus"
+	select BR2_PACKAGE_SYSTEM_UTILS
+	select BR2_PACKAGE_IOSF
+	default n
+	help
+	  Files tagged:
+	  lib/modules/sven_linux.ko lib/libomarwave.so lib/libhtuple.so lib/libsven.so bin/csven scripts/ bin/mcu_config bin/pci_query etc/rc3.d/sven etc/init.d/sven
+
+	  Most people should answer N.
+
