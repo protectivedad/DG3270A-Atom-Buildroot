@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. /etc/profile
+
+systohc() {
+	/sbin/hwclock --systohc --localtime
+}
+
+case "$1" in
+step|stratum|periodic)
+	systohc
+	;;
+unsync)
+	;;
+*)
+	echo "ERROR: Unknown or no action provided."
+	exit 1
+	;;
+esac
+

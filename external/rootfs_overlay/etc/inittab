@@ -91,6 +91,6 @@
 # ::shutdown:/sbin/swapoff -a
 
 # Respawn items that we always want to have running
-::respawn:/usr/sbin/ntpd -n -N -p 192.168.1.1
+::respawn:/usr/sbin/ntpd -n -N -p 192.168.1.1 -S /etc/sysfixtime
 ::respawn:/usr/sbin/crond -f -c /etc/crontabs -l 8
 

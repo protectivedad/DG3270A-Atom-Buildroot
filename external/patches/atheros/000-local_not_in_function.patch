@@ -1,0 +1,165 @@
+--- a/etc/ath/apup
++++ b/etc/ath/apup
+@@ -299,6 +299,82 @@ configure_bandsteering()
+ }
+ 
+ 
++# The Green AP set in makeVAP doesn't work for 5G radio, move the setting here
++iterate_configure_radio() {
++
++    local TARGET_RADIO=0
++    local ITER_TYPE=${3:-per_radio}
++    local CMD_TYPE=${4:-none}
++    local GROUP_NAME="g_ath"
++
++    if [ "${2:-radio_2}" = "radio_2" ]; then
++        TARGET_RADIO=1
++    fi
++
++    VAP_NUM=-1
++
++    for i in $my_vaps
++    do
++        VAP_NUM=$((VAP_NUM+1))
++        eval i=${i}
++        ITER_AP_ENABLE="AP_ENABLE${i}"
++        ITER_SSID="AP_SSID${i}"
++        ITER_RADIO_ID="AP_RADIO_ID${i}"
++        eval ITER_AP_ENABLE=\${$ITER_AP_ENABLE:=0}
++        eval ITER_SSID=\$$ITER_SSID
++        eval ITER_RADIO_ID=\${$ITER_RADIO_ID:=0}
++
++        # Skip VAP if not for this radio -
++        if [ "${ITER_RADIO_ID}" != "${TARGET_RADIO}" ]; then
++            continue;
++        fi
++
++        # For future apup <radio> support:
++        if [ "${ITER_RADIO_ID}" != "${CUR_RADIO_ID}" -a "${CUR_RADIO_ID}" != "3" ]; then
++            continue;
++        fi
++
++        # Skip VAP if not enabled -
++        if [ "${ITER_AP_ENABLE}" != "1" ]; then
++            continue;
++        fi
++
++        ########## Parse the input command ################
++        local COMMAND="" y="" NEW=""
++        for y in $1
++        do
++            eval NEW=$y
++            COMMAND="${COMMAND} "${NEW}
++        done
++
++        ########## Execute the command ####################
++        echo "$COMMAND"
++        eval $COMMAND
++
++        if [ "${ITER_TYPE}" = "per_radio" ]; then
++            break
++        fi
++
++    done
++}
++
++configure_radio() {
++
++	local my_radios="_2 ''"
++	for r in $my_radios
++	do
++	    eval r=${r}
++	    PWRSAVE="AP_PWRSAVE${r}"
++	    eval PWRSAVE=\${$PWRSAVE:=${AP_PWRSAVE}}
++
++	    IN_COMMAND='iwpriv ath${VAP_NUM} ant_ps_on "${PWRSAVE}"'
++	    iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_vap" "SSID"
++
++	done
++}
++
++# End Green AP set
++
+ ### ARRIS ADD - END - Function definitions ###
+ 
+ 
+@@ -1348,78 +1424,6 @@ fi
+ 
+ configure_bandsteering
+ 
+-# The Green AP set in makeVAP doesn't work for 5G radio, move the setting here
+-iterate_configure_radio() {
+-
+-    local TARGET_RADIO=0
+-    local ITER_TYPE=${3:-per_radio}
+-    local CMD_TYPE=${4:-none}
+-    local GROUP_NAME="g_ath"
+-
+-    if [ "${2:-radio_2}" = "radio_2" ]; then
+-        TARGET_RADIO=1
+-    fi
+-
+-    VAP_NUM=-1
+-
+-    for i in $my_vaps
+-    do
+-        VAP_NUM=$((VAP_NUM+1))
+-        eval i=${i}
+-        ITER_AP_ENABLE="AP_ENABLE${i}"
+-        ITER_SSID="AP_SSID${i}"
+-        ITER_RADIO_ID="AP_RADIO_ID${i}"
+-        eval ITER_AP_ENABLE=\${$ITER_AP_ENABLE:=0}
+-        eval ITER_SSID=\$$ITER_SSID
+-        eval ITER_RADIO_ID=\${$ITER_RADIO_ID:=0}
+-
+-        # Skip VAP if not for this radio -
+-        if [ "${ITER_RADIO_ID}" != "${TARGET_RADIO}" ]; then
+-            continue;
+-        fi
+-
+-        # For future apup <radio> support:
+-        if [ "${ITER_RADIO_ID}" != "${CUR_RADIO_ID}" -a "${CUR_RADIO_ID}" != "3" ]; then
+-            continue;
+-        fi
+-
+-        # Skip VAP if not enabled -
+-        if [ "${ITER_AP_ENABLE}" != "1" ]; then
+-            continue;
+-        fi
+-
+-        ########## Parse the input command ################
+-        local COMMAND="" y="" NEW=""
+-        for y in $1
+-        do
+-            eval NEW=$y
+-            COMMAND="${COMMAND} "${NEW}
+-        done
+-
+-        ########## Execute the command ####################
+-        echo "$COMMAND"
+-        eval $COMMAND
+-
+-        if [ "${ITER_TYPE}" = "per_radio" ]; then
+-            break
+-        fi
+-
+-    done    
+-}
+-
+-local my_radios="_2 ''"
+-for r in $my_radios
+-do
+-    eval r=${r}
+-    PWRSAVE="AP_PWRSAVE${r}"
+-    eval PWRSAVE=\${$PWRSAVE:=${AP_PWRSAVE}}
+-
+-    IN_COMMAND='iwpriv ath${VAP_NUM} ant_ps_on "${PWRSAVE}"'
+-    iterate_configure_radio "${IN_COMMAND}" "radio${r}" "per_vap" "SSID"
+-
+-done
+-
+-# End Green AP set
+-
++configure_radio
+ 
+ # ARRIS MOD - END
