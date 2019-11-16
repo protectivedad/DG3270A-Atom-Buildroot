@@ -4,7 +4,7 @@
 #
 ################################################################################
 ATHEROS_VERSION = 1.0
-ATHEROS_SITE = $(BR2_EXTERNAL)/sources
+ATHEROS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 ATHEROS_SITE_METHOD = file
 ATHEROS_SOURCE = atheros.tar.xz
 

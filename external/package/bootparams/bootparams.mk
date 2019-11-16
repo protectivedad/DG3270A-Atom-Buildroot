@@ -4,7 +4,7 @@
 #
 ################################################################################
 BOOTPARAMS_VERSION = 1.0
-BOOTPARAMS_SITE = $(BR2_EXTERNAL)/sources
+BOOTPARAMS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 BOOTPARAMS_SITE_METHOD = file
 BOOTPARAMS_SOURCE = bootparams.tar.xz
 

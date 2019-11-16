@@ -4,7 +4,7 @@
 #
 ################################################################################
 DTS_VERSION = 1.0
-DTS_SITE = $(BR2_EXTERNAL)/sources
+DTS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 DTS_SITE_METHOD = file
 DTS_SOURCE = dts.tar.xz
 

@@ -4,7 +4,7 @@
 #
 ################################################################################
 PWM_VERSION = 1.0
-PWM_SITE = $(BR2_EXTERNAL)/sources
+PWM_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PWM_SITE_METHOD = file
 PWM_SOURCE = pwm.tar.xz
 

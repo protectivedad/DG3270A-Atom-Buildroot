@@ -1,6 +1,6 @@
 .EXPORT_ALL_VARIABLES:
 
-BUILDROOT_VERS := 2016.08.1
+BUILDROOT_VERS := 2017.05.2
 BUILDROOT_SRC := buildroot-${BUILDROOT_VERS}.tar.bz2
 
 export PROJ_DIR=$(shell pwd)
@@ -33,7 +33,7 @@ $(BR_DIR)/.config: $(BR_DIR)/Makefile
 	touch ${BR_DIR}/.config
 
 busybox-mergeconfig:
-	meld ${BR_DIR}/output/build/busybox-1.25.0/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
+	meld ${BR_DIR}/output/build/busybox-1.26.2/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
 prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/.config
 
@@ -42,8 +42,8 @@ saveconfigs:
 	make busybox-savedefconfig
 	make linux-savedefconfig
 
-busybox-savedefconfig: ${BR_DIR}/output/build/busybox-1.25.0/.config
-	cp ${BR_DIR}/output/build/busybox-1.25.0/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
+busybox-savedefconfig: ${BR_DIR}/output/build/busybox-1.26.2/.config
+	cp ${BR_DIR}/output/build/busybox-1.26.2/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
 linux-savedefconfig: ${BR_DIR}/output/build/linux-2.6.39/.config
 	make -C ${BR_DIR} $@

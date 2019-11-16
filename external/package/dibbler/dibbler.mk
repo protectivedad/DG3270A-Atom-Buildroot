@@ -4,7 +4,7 @@
 #
 ################################################################################
 DIBBLER_VERSION = 1.0
-DIBBLER_SITE = $(BR2_EXTERNAL)/sources
+DIBBLER_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 DIBBLER_SITE_METHOD = file
 DIBBLER_SOURCE = dibbler.tar.xz
 

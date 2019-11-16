@@ -4,7 +4,7 @@
 #
 ################################################################################
 TWISTER_VERSION = 1.0
-TWISTER_SITE = $(BR2_EXTERNAL)/sources
+TWISTER_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 TWISTER_SITE_METHOD = file
 TWISTER_SOURCE = twister.tar.xz
 

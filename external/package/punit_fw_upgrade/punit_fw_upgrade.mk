@@ -4,7 +4,7 @@
 #
 ################################################################################
 PUNIT_FW_UPGRADE_VERSION = 1.0
-PUNIT_FW_UPGRADE_SITE = $(BR2_EXTERNAL)/sources
+PUNIT_FW_UPGRADE_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PUNIT_FW_UPGRADE_SITE_METHOD = file
 PUNIT_FW_UPGRADE_SOURCE = bootparams.tar.xz
 

@@ -4,7 +4,7 @@
 #
 ################################################################################
 ARRIS_CLIENTS_VERSION = 1.0
-ARRIS_CLIENTS_SITE = $(BR2_EXTERNAL)/sources
+ARRIS_CLIENTS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 ARRIS_CLIENTS_SITE_METHOD = file
 ARRIS_CLIENTS_SOURCE = arris_clients.tar.xz
 

@@ -4,7 +4,7 @@
 #
 ################################################################################
 IDL_VERSION = 1.0
-IDL_SITE = $(BR2_EXTERNAL)/sources
+IDL_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 IDL_SITE_METHOD = file
 IDL_SOURCE = idl.tar.xz
 

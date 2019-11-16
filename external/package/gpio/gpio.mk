@@ -4,7 +4,7 @@
 #
 ################################################################################
 GPIO_VERSION = 1.0
-GPIO_SITE = $(BR2_EXTERNAL)/sources
+GPIO_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 GPIO_SITE_METHOD = file
 GPIO_SOURCE = gpio.tar.xz
 

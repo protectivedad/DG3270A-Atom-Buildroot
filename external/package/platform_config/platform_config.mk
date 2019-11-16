@@ -4,7 +4,7 @@
 #
 ################################################################################
 PLATFORM_CONFIG_VERSION = 1.0
-PLATFORM_CONFIG_SITE = $(BR2_EXTERNAL)/sources
+PLATFORM_CONFIG_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PLATFORM_CONFIG_SITE_METHOD = file
 PLATFORM_CONFIG_SOURCE = platform_config.tar.xz
 

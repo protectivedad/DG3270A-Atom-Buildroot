@@ -1,0 +1,13 @@
+--- a/Makefile
++++ b/Makefile
+@@ -292,8 +292,8 @@ AS		= $(CROSS_COMPILE)as
+ CC		= $(CROSS_COMPILE)gcc
+ LD		= $(CC) -nostdlib
+ CPP		= $(CC) -E
+-AR		= $(CROSS_COMPILE)ar
+-NM		= $(CROSS_COMPILE)nm
++AR		= $(CROSS_COMPILE)gcc-ar
++NM		= $(CROSS_COMPILE)gcc-nm
+ STRIP		= $(CROSS_COMPILE)strip
+ OBJCOPY		= $(CROSS_COMPILE)objcopy
+ OBJDUMP		= $(CROSS_COMPILE)objdump

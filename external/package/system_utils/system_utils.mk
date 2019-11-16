@@ -4,7 +4,7 @@
 #
 ################################################################################
 SYSTEM_UTILS_VERSION = 1.0
-SYSTEM_UTILS_SITE = $(BR2_EXTERNAL)/sources
+SYSTEM_UTILS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 SYSTEM_UTILS_SITE_METHOD = file
 SYSTEM_UTILS_SOURCE = system_utils.tar.xz
 

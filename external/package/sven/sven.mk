@@ -4,7 +4,7 @@
 #
 ################################################################################
 SVEN_VERSION = 1.0
-SVEN_SITE = $(BR2_EXTERNAL)/sources
+SVEN_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 SVEN_SITE_METHOD = file
 SVEN_SOURCE = sven.tar.xz
 

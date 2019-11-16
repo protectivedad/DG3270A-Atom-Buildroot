@@ -4,7 +4,7 @@
 #
 ################################################################################
 IPROUTE2_BIN_VERSION = 1.0
-IPROUTE2_BIN_SITE = $(BR2_EXTERNAL)/sources
+IPROUTE2_BIN_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 IPROUTE2_BIN_SITE_METHOD = file
 IPROUTE2_BIN_SOURCE = iproute2_bin.tar.xz
 

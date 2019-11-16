@@ -4,7 +4,7 @@
 #
 ################################################################################
 DEVMEM_VERSION = 1.0
-DEVMEM_SITE = $(BR2_EXTERNAL)/sources
+DEVMEM_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 DEVMEM_SITE_METHOD = file
 DEVMEM_SOURCE = devmem.tar.xz
 

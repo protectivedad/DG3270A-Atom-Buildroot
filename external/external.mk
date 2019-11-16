@@ -1,4 +1,4 @@
-include $(sort $(wildcard $(BR2_EXTERNAL)/package/*/*.mk))
+include $(sort $(wildcard $(BR2_EXTERNAL_DEFAULT_PATH)/package/*/*.mk))
 
 ifeq ($(BR2_PACKAGE_HOSTAPD),y)
 ifeq ($(BR2_PACKAGE_HOSTAPD_QCA988X),y)

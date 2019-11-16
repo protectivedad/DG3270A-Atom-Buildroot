@@ -4,7 +4,7 @@
 #
 ################################################################################
 SEC_KERNEL_VERSION = 1.0
-SEC_KERNEL_SITE = $(BR2_EXTERNAL)/sources
+SEC_KERNEL_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 SEC_KERNEL_SITE_METHOD = file
 SEC_KERNEL_SOURCE = sec_kernel.tar.xz
 

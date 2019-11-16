@@ -4,7 +4,7 @@
 #
 ################################################################################
 XTABLES_VERSION = 1.0
-XTABLES_SITE = $(BR2_EXTERNAL)/sources
+XTABLES_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 XTABLES_SITE_METHOD = file
 XTABLES_SOURCE = xtables.tar.xz
 

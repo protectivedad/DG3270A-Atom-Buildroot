@@ -4,7 +4,7 @@
 #
 ################################################################################
 INTEL_CE_PM_VERSION = 1.0
-INTEL_CE_PM_SITE = $(BR2_EXTERNAL)/sources
+INTEL_CE_PM_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 INTEL_CE_PM_SITE_METHOD = file
 INTEL_CE_PM_SOURCE = intel_ce_pm.tar.xz
 

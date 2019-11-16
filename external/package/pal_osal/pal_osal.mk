@@ -4,7 +4,7 @@
 #
 ################################################################################
 PAL_OSAL_VERSION = 1.0
-PAL_OSAL_SITE = $(BR2_EXTERNAL)/sources
+PAL_OSAL_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PAL_OSAL_SITE_METHOD = file
 PAL_OSAL_SOURCE = pal_osal.tar.xz
 

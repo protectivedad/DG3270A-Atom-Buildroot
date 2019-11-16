@@ -4,7 +4,7 @@
 #
 ################################################################################
 SC_USB_TOOLS_VERSION = 1.0
-SC_USB_TOOLS_SITE = $(BR2_EXTERNAL)/sources
+SC_USB_TOOLS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 SC_USB_TOOLS_SITE_METHOD = file
 SC_USB_TOOLS_SOURCE = sc_usb_tools.tar.xz
 

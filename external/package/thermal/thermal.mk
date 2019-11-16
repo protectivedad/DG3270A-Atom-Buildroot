@@ -4,7 +4,7 @@
 #
 ################################################################################
 THERMAL_VERSION = 1.0
-THERMAL_SITE = $(BR2_EXTERNAL)/sources
+THERMAL_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 THERMAL_SITE_METHOD = file
 THERMAL_SOURCE = thermal.tar.xz
 

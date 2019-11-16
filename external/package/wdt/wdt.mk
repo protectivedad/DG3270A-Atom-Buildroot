@@ -4,7 +4,7 @@
 #
 ################################################################################
 WDT_VERSION = 1.0
-WDT_SITE = $(BR2_EXTERNAL)/sources
+WDT_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 WDT_SITE_METHOD = file
 WDT_SOURCE = wdt.tar.xz
 

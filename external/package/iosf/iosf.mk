@@ -4,7 +4,7 @@
 #
 ################################################################################
 IOSF_VERSION = 1.0
-IOSF_SITE = $(BR2_EXTERNAL)/sources
+IOSF_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 IOSF_SITE_METHOD = file
 IOSF_SOURCE = iosf.tar.xz
 
