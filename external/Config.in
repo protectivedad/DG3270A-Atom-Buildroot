@@ -40,7 +40,6 @@ endmenu
 
 endif
 
-source "$BR2_EXTERNAL_DEFAULT_PATH/package/portmap/Config.in"
 source "$BR2_EXTERNAL_DEFAULT_PATH/package/atheros/Config.in"
 source "$BR2_EXTERNAL_DEFAULT_PATH/package/iproute2_bin/Config.in"
 source "$BR2_EXTERNAL_DEFAULT_PATH/package/hnc/Config.in"

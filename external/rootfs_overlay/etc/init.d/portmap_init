@@ -73,11 +73,8 @@ PATH=/usr/local/bin:/usr/bin:/bin:/sbin
 APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
 
 start_function() {
-	debug_print "Trying to start portmap and bind to 127.0.0.1 and $APP_RPC_IP"
-	try_command portmap -l -i $APP_RPC_IP
- #ARRIS - Remove netconf_service which starts Lua RPC
- #netconf_service& 
- #ARRIS - End
+	debug_print "Trying to start rpcbind as portmap on $APP_RPC_IP"
+	try_command portmap -i -h $APP_RPC_IP
 }
 
 stop_function() {
