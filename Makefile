@@ -3,8 +3,6 @@
 BUILDROOT_VERS := 2015.11.1
 BUILDROOT_SRC := buildroot-${BUILDROOT_VERS}.tar.bz2
 
-GLIBC_SRC := glibc
-
 export PROJ_DIR=$(shell pwd)
 
 include definitions
@@ -16,9 +14,6 @@ all:
 
 $(PROJ_DL_DIR) $(BR_DIR):
 	mkdir -p $@
-
-$(PROJ_DL_DIR)/$(GLIBC_SRC):
-	git -b v${BUILDROOT_VERS} clone https://github.com/protectivedad/DG3270A-Atom-Glibc.git ${PROJ_DL_DIR}/glibc
 
 $(PROJ_DL_DIR)/$(BUILDROOT_SRC):
 	wget https://buildroot.org/downloads/${BUILDROOT_SRC} -O ${PROJ_DL_DIR}/${BUILDROOT_SRC}
@@ -40,7 +35,7 @@ $(BR_DIR)/.config: $(BR_DIR)/Makefile
 busybox-mergeconfig:
 	meld ${BR_DIR}/output/build/busybox-1.24.1/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
-prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/.config $(PROJ_DL_DIR)/$(GLIBC_SRC)
+prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/.config
 
 saveconfigs:
 	cd ${BR_DIR}; make savedefconfig

@@ -55,7 +55,12 @@ fi
 echo "MD5 checksum passed."
 
 echo "About to write ${source}->${dest}, proceed (y/n)"
-read proceed
+
+if [[ "$1" == "-y" ]]; then
+	proceed="y"
+else
+	read proceed
+fi
 
 if [[ "${proceed}" == "y" ]]; then
 	cat ${source} >${dest}
