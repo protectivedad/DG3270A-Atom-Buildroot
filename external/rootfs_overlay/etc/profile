@@ -45,6 +45,9 @@ fi
 # Aliases
 #------------------------------------------------------------------------------
 # Busybox does not currently support alias so these commands are not enabled
-#alias ls="ls --color=auto"
-#alias lf="ls -lF"
-#alias lff="ls -alF"
+alias ls="ls --color=auto"
+alias lf="ls -lF"
+alias lff="ls -alF"
+
+export TZ=$(cat /etc/TZ)
+
