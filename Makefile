@@ -1,13 +1,16 @@
 .EXPORT_ALL_VARIABLES:
 
-BUILDROOT_VERS := 2017.05.2
+BUSYBOX_VERS := 1.27.2
+BUILDROOT_VERS := 2017.08.2
 BUILDROOT_SRC := buildroot-${BUILDROOT_VERS}.tar.bz2
+
+GLIBC_SRC := glibc
 
 export PROJ_DIR=$(shell pwd)
 
 include definitions
 
-.PHONY: all clean toolchain nonlto lto
+.PHONY: all clean toolchain nonlto lto continue saveconfigs
 
 all:
 	@echo "Do: make {stage}"
@@ -17,6 +20,9 @@ all:
 
 $(PROJ_DL_DIR) $(BR_DIR):
 	mkdir -p $@
+
+$(PROJ_DL_DIR)/$(GLIBC_SRC):
+	git clone --depth=1 -b v2.23 https://github.com/protectivedad/DG3270A-Atom-Glibc.git ${PROJ_DL_DIR}/glibc
 
 $(PROJ_DL_DIR)/$(BUILDROOT_SRC):
 	wget https://buildroot.org/downloads/${BUILDROOT_SRC} -O ${PROJ_DL_DIR}/${BUILDROOT_SRC}
@@ -31,10 +37,14 @@ $(BR_DIR)/Makefile: $(PROJ_DL_DIR)/$(BUILDROOT_SRC)
 	done
 	touch ${BR_DIR}/Makefile
 
-busybox-mergeconfig:
-	meld ${BR_DIR}/output/build/busybox-1.26.2/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
+$(BR_DIR)/.config: $(BR_DIR)/Makefile
+	make -C ${BR_DIR} buildroot_defconfig
+	touch ${BR_DIR}/.config
 
-.toolchain_prep: $(BR_DIR) $(PROJ_DL_DIR) $(PROJ_TC_DIR) $(BR_DIR)/Makefile
+busybox-mergeconfig:
+	meld ${BR_DIR}/output/build/busybox-${BUSYBOX_VERS}/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
+
+.toolchain_prep: $(BR_DIR) $(PROJ_DL_DIR) $(PROJ_TC_DIR) $(BR_DIR)/Makefile $(PROJ_DL_DIR)/$(GLIBC_SRC)
 	make -C ${BR_DIR} toolchain_defconfig
 
 toolchain: .toolchain_prep
@@ -46,7 +56,7 @@ lto_gcc := ar nm ranlib
 # then do the nonlto defconfig and cleanup everything for fresh
 # build this is necessary for removing the buildroot toolchain
 # to use it as an external toolchain.
-.nonlto_prep:
+.nonlto_prep: $(BR_DIR) $(PROJ_DL_DIR) $(PROJ_TC_DIR) $(BR_DIR)/Makefile
 	for item in $(lto_gcc); do \
 		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
 	done
@@ -82,22 +92,35 @@ lto: .lto
 	@echo "$@ has been built."
 	@echo "Image has been built."
 
+continue:
+	make -C ${BR_DIR}
+
 saveconfigs:
 	cd ${BR_DIR}; make savedefconfig
 	make busybox-savedefconfig
 	make linux-savedefconfig
 
-busybox-savedefconfig: ${BR_DIR}/output/build/busybox-1.26.2/.config
-	cp ${BR_DIR}/output/build/busybox-1.26.2/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
+busybox-savedefconfig: ${BR_DIR}/output/build/busybox-${BUSYBOX_VERS}/.config
+	cp ${BR_DIR}/output/build/busybox-${BUSYBOX_VERS}/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
 linux-savedefconfig: ${BR_DIR}/output/build/linux-2.6.39/.config
 	make -C ${BR_DIR} $@
 	cp -a ${BR_DIR}/output/build/linux-2.6.39/.config ${BR2_EXTERNAL}/configs/linux_defconfig
 
+# Get rid of the downloads also.
+distclean: realclean
+	git clean -dfX dl/
+
+# Also clear the toolchain.
+realclean: clean
+	git clean -dfX toolchain/
+
+# Clear first level ignores and images.
 clean:
 	for item in $$(cat .gitignore); do \
 		git clean -dfX ./$${item}; \
 	done
+	git clean -dfX images/
 
 %:
 	cd ${BR_DIR}; make $@

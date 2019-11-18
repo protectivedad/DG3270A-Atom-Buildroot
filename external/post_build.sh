@@ -4,6 +4,9 @@ ROOTFS=$1
 
 cd ${ROOTFS}
 
+# Remove readline "old" files
+rm `find usr/lib -name '*.old'`
+
 rm_links='lib32 usr/lib32'
 # Remove unneeded links.
 for link in ${rm_links}; do

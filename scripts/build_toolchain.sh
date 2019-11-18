@@ -15,5 +15,7 @@ export PROJ_DIR=$(pwd)
 
 . ${PROJ_DIR}/definitions
 
+make toolchain
+
 make -C ${BR_DIR} && touch .toolchain || exit 1
 
