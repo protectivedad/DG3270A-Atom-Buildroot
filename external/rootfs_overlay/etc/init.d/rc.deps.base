@@ -1,7 +1,7 @@
 kernel
 network rpc_ifconfig_init
 nvram
-portmap_init nvram rpc_ifconfig_init
+portmap_init network nvram rpc_ifconfig_init
 rpc_ifconfig_init nvram
 rpc_management_srv_init nvram portmap_init
 arris_event_init network

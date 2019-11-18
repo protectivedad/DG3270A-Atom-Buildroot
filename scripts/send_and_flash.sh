@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Waiting for router ..."
-until ping -c1 192.168.1.252 >/dev/null 2>&1; do :; done
+until ping -c1  dg3270a >/dev/null 2>&1; do :; done
 
 eval $(ssh dg3270a cat /proc/cmdline)
 

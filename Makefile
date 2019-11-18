@@ -31,21 +31,15 @@ $(BR_DIR)/Makefile: $(PROJ_DL_DIR)/$(BUILDROOT_SRC)
 	done
 	touch ${BR_DIR}/Makefile
 
-$(BR_DIR)/.config: $(BR_DIR)/Makefile
-	make -C ${BR_DIR} toolchain_defconfig
-	touch ${BR_DIR}/.config
-
 busybox-mergeconfig:
 	meld ${BR_DIR}/output/build/busybox-1.26.2/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
-.toolchain_prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/Makefile
+.toolchain_prep: $(BR_DIR) $(PROJ_DL_DIR) $(PROJ_TC_DIR) $(BR_DIR)/Makefile
 	make -C ${BR_DIR} toolchain_defconfig
 
-.toolchain: .toolchain_prep
-
-toolchain: .toolchain
+toolchain: .toolchain_prep
 	@echo "$@ has been prepared."
-	@echo "Need to manually run ./scripts/build.sh toolchain"
+	@echo "Need to manually run './scripts/build_toolchain.sh'"
 
 lto_gcc := ar nm ranlib
 # Make sure we are using the non-gcc wrapped ar nm and ranlib
@@ -101,7 +95,9 @@ linux-savedefconfig: ${BR_DIR}/output/build/linux-2.6.39/.config
 	cp -a ${BR_DIR}/output/build/linux-2.6.39/.config ${BR2_EXTERNAL}/configs/linux_defconfig
 
 clean:
-	git clean -dXf .
+	for item in $$(cat .gitignore); do \
+		git clean -dfX ./$${item}; \
+	done
 
 %:
 	cd ${BR_DIR}; make $@
