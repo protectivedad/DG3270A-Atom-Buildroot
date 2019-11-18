@@ -7,10 +7,13 @@ export PROJ_DIR=$(shell pwd)
 
 include definitions
 
-.PHONY: all clean prep
+.PHONY: all clean toolchain nonlto lto
 
 all:
-	echo "Run build_image.sh to compile image."
+	@echo "Do: make {stage}"
+	@echo "  Where stage is either toolchain, nolto or lto."
+	@echo "For toolchain './scripts/build toolchain' needs to"
+	@echo "be run to complete the stage."
 
 $(PROJ_DL_DIR) $(BR_DIR):
 	mkdir -p $@
@@ -29,13 +32,61 @@ $(BR_DIR)/Makefile: $(PROJ_DL_DIR)/$(BUILDROOT_SRC)
 	touch ${BR_DIR}/Makefile
 
 $(BR_DIR)/.config: $(BR_DIR)/Makefile
-	make -C ${BR_DIR} buildroot_defconfig
+	make -C ${BR_DIR} toolchain_defconfig
 	touch ${BR_DIR}/.config
 
 busybox-mergeconfig:
 	meld ${BR_DIR}/output/build/busybox-1.26.2/.config ${BR2_EXTERNAL}/configs/busybox_defconfig
 
-prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/.config
+.toolchain_prep: $(BR_DIR) $(PROJ_DL_DIR) $(BR_DIR)/Makefile
+	make -C ${BR_DIR} toolchain_defconfig
+
+.toolchain: .toolchain_prep
+
+toolchain: .toolchain
+	@echo "$@ has been prepared."
+	@echo "Need to manually run ./scripts/build.sh toolchain"
+
+lto_gcc := ar nm ranlib
+# Make sure we are using the non-gcc wrapped ar nm and ranlib
+# then do the nonlto defconfig and cleanup everything for fresh
+# build this is necessary for removing the buildroot toolchain
+# to use it as an external toolchain.
+.nonlto_prep:
+	for item in $(lto_gcc); do \
+		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
+	done
+	make -C ${BR_DIR} nonlto_defconfig
+	make -C ${BR_DIR} clean
+
+.nonlto: .nonlto_prep
+	make -C ${BR_DIR}
+	touch $@
+
+nonlto: .nonlto
+	@echo "$@ has been built."
+	@echo "Build the lto kernel and apps next."
+
+# Make sure we are using the gcc wrapped ar nm and ranlib
+# then do the lto defconfig and clean the external toolchain
+# to pick up the new optimization flags.
+.lto_prep:
+	for item in $(lto_gcc); do \
+		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-gcc-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
+	done
+	make -C ${BR_DIR} lto_defconfig
+	make -C ${BR_DIR} toolchain-external-custom-dirclean
+
+.lto: .lto_prep
+	make -C ${BR_DIR}
+	touch $@
+
+lto: .lto
+	for item in $(lto_gcc); do \
+		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
+	done
+	@echo "$@ has been built."
+	@echo "Image has been built."
 
 saveconfigs:
 	cd ${BR_DIR}; make savedefconfig

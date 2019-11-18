@@ -11,8 +11,14 @@
 #       dl/         - Download directory
 #
 
+if [[ "$1" == "" ]]; then
+	echo "Needed stage to build either toolchain, nonlto, or lto."
+	exit 1
+fi
+
 export PROJ_DIR=$(pwd)
 
 . ${PROJ_DIR}/definitions
 
-make prep && make -C ${BR_DIR}
+make -C ${BR_DIR} && touch .$1 || exit 1
+

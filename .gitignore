@@ -1,2 +1,6 @@
 /dl
 /buildroot
+/.toolchain
+/.toolchain_detach
+/.nonlto
+/.lto
