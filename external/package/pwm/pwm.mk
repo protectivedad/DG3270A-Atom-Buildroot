@@ -8,10 +8,6 @@ PWM_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PWM_SITE_METHOD = file
 PWM_SOURCE = pwm.tar.xz
 
-define PWM_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${PWM_SOURCE}
-endef
-
 define PWM_BUILD_CMDS
 	echo "No building required."
 endef

@@ -8,10 +8,6 @@ HNC_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 HNC_SITE_METHOD = file
 HNC_SOURCE = hnc.tar.xz
 
-define HNC_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${HNC_SOURCE}
-endef
-
 define HNC_BUILD_CMDS
 	echo "No building required."
 endef

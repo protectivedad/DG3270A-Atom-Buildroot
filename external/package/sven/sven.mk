@@ -8,10 +8,6 @@ SVEN_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 SVEN_SITE_METHOD = file
 SVEN_SOURCE = sven.tar.xz
 
-define SVEN_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${SVEN_SOURCE}
-endef
-
 define SVEN_BUILD_CMDS
 	echo "No building required."
 endef

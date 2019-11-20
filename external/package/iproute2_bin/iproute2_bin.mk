@@ -8,10 +8,6 @@ IPROUTE2_BIN_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 IPROUTE2_BIN_SITE_METHOD = file
 IPROUTE2_BIN_SOURCE = iproute2_bin.tar.xz
 
-define IPROUTE2_BIN_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${IPROUTE2_BIN_SOURCE}
-endef
-
 define IPROUTE2_BIN_BUILD_CMDS
 	echo "No building required."
 endef

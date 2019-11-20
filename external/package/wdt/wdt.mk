@@ -8,10 +8,6 @@ WDT_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 WDT_SITE_METHOD = file
 WDT_SOURCE = wdt.tar.xz
 
-define WDT_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${WDT_SOURCE}
-endef
-
 define WDT_BUILD_CMDS
 	echo "No building required."
 endef

@@ -8,10 +8,6 @@ PUNIT_FW_UPGRADE_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PUNIT_FW_UPGRADE_SITE_METHOD = file
 PUNIT_FW_UPGRADE_SOURCE = bootparams.tar.xz
 
-define PUNIT_FW_UPGRADE_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${PUNIT_FW_UPGRADE_SOURCE}
-endef
-
 define PUNIT_FW_UPGRADE_BUILD_CMDS
 	echo "No building required."
 endef

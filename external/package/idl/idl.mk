@@ -8,10 +8,6 @@ IDL_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 IDL_SITE_METHOD = file
 IDL_SOURCE = idl.tar.xz
 
-define IDL_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${IDL_SOURCE}
-endef
-
 define IDL_BUILD_CMDS
 	echo "No building required."
 endef

@@ -8,10 +8,6 @@ BOOTPARAMS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 BOOTPARAMS_SITE_METHOD = file
 BOOTPARAMS_SOURCE = bootparams.tar.xz
 
-define BOOTPARAMS_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${BOOTPARAMS_SOURCE}
-endef
-
 define BOOTPARAMS_BUILD_CMDS
 	echo "No building required."
 endef

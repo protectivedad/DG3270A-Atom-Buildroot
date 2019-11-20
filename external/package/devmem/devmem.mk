@@ -8,10 +8,6 @@ DEVMEM_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 DEVMEM_SITE_METHOD = file
 DEVMEM_SOURCE = devmem.tar.xz
 
-define DEVMEM_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${DEVMEM_SOURCE}
-endef
-
 define DEVMEM_BUILD_CMDS
 	echo "No building required."
 endef

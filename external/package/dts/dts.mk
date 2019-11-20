@@ -8,10 +8,6 @@ DTS_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 DTS_SITE_METHOD = file
 DTS_SOURCE = dts.tar.xz
 
-define DTS_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${DTS_SOURCE}
-endef
-
 define DTS_BUILD_CMDS
 	echo "No building required."
 endef

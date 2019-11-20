@@ -8,10 +8,6 @@ PLATFORM_CONFIG_SITE = $(BR2_EXTERNAL_DEFAULT_PATH)/sources
 PLATFORM_CONFIG_SITE_METHOD = file
 PLATFORM_CONFIG_SOURCE = platform_config.tar.xz
 
-define PLATFORM_CONFIG_EXTRACT_CMDS
-	tar -C $(@D) -xf ${DL_DIR}/${PLATFORM_CONFIG_SOURCE}
-endef
-
 define PLATFORM_CONFIG_BUILD_CMDS
 	echo "No building required."
 endef
