@@ -1,14 +1,14 @@
 .EXPORT_ALL_VARIABLES:
 
-BUSYBOX_VERS := 1.27.2
-BUILDROOT_VERS := 2017.08.2
+BUSYBOX_VERS := 1.29.3
+BUILDROOT_VERS := 2019.02.7
 BUILDROOT_SRC := buildroot-${BUILDROOT_VERS}.tar.bz2
 
 GLIBC_SRC := glibc
 
-export PROJ_DIR=$(shell pwd)
+export DG3270A_PROJ_DIR=$(shell pwd)
 
-include definitions
+include ${DG3270A_PROJ_DIR}/definitions
 
 .PHONY: all clean toolchain nonlto lto continue saveconfigs
 
@@ -58,7 +58,7 @@ lto_gcc := ar nm ranlib
 # to use it as an external toolchain.
 .nonlto_prep: $(BR_DIR) $(PROJ_DL_DIR) $(PROJ_TC_DIR) $(BR_DIR)/Makefile
 	for item in $(lto_gcc); do \
-		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
+		ln -srfn ${DG3270A_PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${DG3270A_PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
 	done
 	make -C ${BR_DIR} nonlto_defconfig
 	make -C ${BR_DIR} clean
@@ -76,7 +76,7 @@ nonlto: .nonlto
 # to pick up the new optimization flags.
 .lto_prep:
 	for item in $(lto_gcc); do \
-		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-gcc-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
+		ln -srfn ${DG3270A_PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-gcc-$${item} ${DG3270A_PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
 	done
 	make -C ${BR_DIR} lto_defconfig
 	make -C ${BR_DIR} toolchain-external-custom-dirclean
@@ -87,7 +87,7 @@ nonlto: .nonlto
 
 lto: .lto
 	for item in $(lto_gcc); do \
-		ln -srfn ${PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
+		ln -srfn ${DG3270A_PROJ_DIR}/toolchain/usr/bin/i686-buildroot-linux-gnu-$${item} ${DG3270A_PROJ_DIR}/toolchain/usr/bin/i686-linux-$${item}; \
 	done
 	@echo "$@ has been built."
 	@echo "Image has been built."

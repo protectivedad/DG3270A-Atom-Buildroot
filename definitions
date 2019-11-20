@@ -1,5 +1,5 @@
-export BR2_EXTERNAL=${PROJ_DIR}/external
-export PROJ_DL_DIR=${PROJ_DIR}/dl
-export PROJ_TC_DIR=${PROJ_DIR}/toolchain
+export BR2_EXTERNAL=${DG3270A_PROJ_DIR}/external
+export PROJ_DL_DIR=${DG3270A_PROJ_DIR}/dl
+export PROJ_TC_DIR=${DG3270A_PROJ_DIR}/toolchain
 BR_DIR=buildroot
 PERL_MM_OPT=

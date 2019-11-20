@@ -11,9 +11,9 @@
 #       dl/         - Download directory
 #
 
-export PROJ_DIR=$(pwd)
+export DG3270A_PROJ_DIR=$(pwd)
 
-. ${PROJ_DIR}/definitions
+. ${DG3270A_PROJ_DIR}/definitions
 
 make toolchain
 
