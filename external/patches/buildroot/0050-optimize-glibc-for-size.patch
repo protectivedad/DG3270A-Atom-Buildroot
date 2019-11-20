@@ -9,6 +9,7 @@
 +		CFLAGS="-Os $(GLIBC_EXTRA_CFLAGS)" CPPFLAGS="" \
 +		CXXFLAGS="-Os $(GLIBC_EXTRA_CFLAGS)" \
 +		LDFLAGS="-Wl,-O1,-s" \
- 		$(SHELL) $(@D)/$(GLIBC_SRC_SUBDIR)/configure \
- 		ac_cv_path_BASH_SHELL=/bin/bash \
- 		libc_cv_forced_unwind=yes \
+ 		$(GLIBC_CONF_ENV) \
+ 		$(SHELL) $(@D)/configure \
+ 		--target=$(GNU_TARGET_NAME) \
+

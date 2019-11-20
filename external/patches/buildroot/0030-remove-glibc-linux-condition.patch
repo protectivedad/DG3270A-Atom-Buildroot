@@ -1,13 +1,13 @@
 --- a/toolchain/toolchain-buildroot/Config.in
 +++ b/toolchain/toolchain-buildroot/Config.in
 @@ -50,7 +50,6 @@ config BR2_TOOLCHAIN_BUILDROOT_GLIBC
- 		   BR2_microblaze || BR2_nios2
+ 		   (BR2_arcle && BR2_ARC_ATOMIC_EXT)
  	depends on BR2_USE_MMU
  	depends on !BR2_STATIC_LIBS
 -	depends on BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_2
+ 	depends on BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_10 || !BR2_powerpc64le
+ 	depends on BR2_TOOLCHAIN_HEADERS_AT_LEAST_4_5 || !BR2_MIPS_NAN_2008
  	depends on !BR2_powerpc_SPE
- 	select BR2_TOOLCHAIN_USES_GLIBC
- 	# our glibc.mk enables RPC support
 @@ -61,9 +60,9 @@ config BR2_TOOLCHAIN_BUILDROOT_GLIBC
  
  	  http://www.gnu.org/software/libc/
