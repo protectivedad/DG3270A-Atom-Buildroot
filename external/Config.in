@@ -1,3 +1,22 @@
+if BR2_PACKAGE_OPENSSL
+
+menu "Openssl extras"
+
+config BR2_PACKAGE_OPENSSL_LEGACY
+	bool "Add legacy libray link"
+	default y
+	help
+	  Adds a libssl.so.1.0.0 link to libssl.so it
+	  is needed for some of the precomiled programs
+	  to run that are linked to it. I don't think
+	  the functionality we use in them actually uses
+	  openssl so I'm not worried about problems with
+	  compatibility, I just need them to run.
+
+endmenu
+
+endif
+
 if BR2_PACKAGE_HOSTAPD
 
 menu "Hostapd overrides"
