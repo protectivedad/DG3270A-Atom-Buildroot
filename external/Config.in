@@ -1,3 +1,21 @@
+if BR2_PACKAGE_RPCBIND
+
+menu "Rpcbind extras"
+
+config BR2_PACKAGE_RPCBIND_LEGACY
+	bool "Add legacy libray link"
+	default y
+	help
+	  Adds a portmap link to rpcbind it is needed for
+	  some of the precomiled programs to run they check
+	  for that specific executable to be running. This
+	  allows them to continue and use rpcbind and not
+	  error.
+
+endmenu
+
+endif
+
 if BR2_PACKAGE_OPENSSL
 
 menu "Openssl extras"
