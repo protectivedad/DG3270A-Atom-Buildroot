@@ -5,13 +5,11 @@ SCRIPTNAME=network
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin
 
 . /etc/init.d/init_utilities
+. /etc/sysconfig/network
 
 start_function() {
     # If /etc/resolv.conf is not writable we'll use this.
     touch /tmp/resolv.conf
-
-    # Set the hostname
-    hostname $HOSTNAME
 
     ########################
     # If necessary, retrieve use DHCP for eth0

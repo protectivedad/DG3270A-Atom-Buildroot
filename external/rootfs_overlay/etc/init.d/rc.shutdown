@@ -18,8 +18,11 @@ umask 0022
 
 # Global Constants
 DEFAULT_RUNLEVEL=3
+
 # Some sub-scripts need HOSTNAME
-export HOSTNAME=intel_ce_linux
+. /etc/sysconfig/network
+export HOSTNAME
+hostname $HOSTNAME
 
 # Check for custom run level; if not set choose the default
 if [ $# -ge 1 ]; then
