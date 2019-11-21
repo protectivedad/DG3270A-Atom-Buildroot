@@ -1,0 +1,14 @@
+diff --git a/backport/backport-include/linux/compiler-gcc8.h b/backport/backport-include/linux/compiler-gcc8.h
+new file mode 100644
+index 00000000..9ff99f0d
+--- /dev/null
++++ b/include/linux/compiler-gcc8.h
+@@ -0,0 +1 @@
++#include <linux/compiler-gcc7.h>
+diff --git a/backport/backport-include/linux/compiler-gcc9.h b/backport/backport-include/linux/compiler-gcc9.h
+new file mode 100644
+index 00000000..9ff99f0d
+--- /dev/null
++++ b//include/linux/compiler-gcc9.h
+@@ -0,0 +1 @@
++#include <linux/compiler-gcc7.h>
