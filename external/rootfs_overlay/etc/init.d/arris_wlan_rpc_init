@@ -99,7 +99,7 @@ start_function() {
         fi
 
         # start WPS LED handler
-        wps_gpio -P start &
+#        wps_gpio -P start &
         # Check for wlandbg (script to be executed):
         if [ -f /nvram/etc/ath/wlandbg ]; then
             /nvram/etc/ath/wlandbg &
@@ -122,12 +122,12 @@ stop_function() {
         # Terminate daemons, remove modules, remove device nodes here
     if [ "$WIFI_VENDOR" == "QCA" ]; then
         killall -SIGTERM qca_rpc_wlan_config_server
-        killall wps_gpio
+#        killall wps_gpio
     elif [ "$WIFI_VENDOR" == "CLR" ]; then
         killall -SIGTERM clr_rpc_wlan_config_server
     elif [ "$WIFI_VENDOR" == "MTK" ]; then
-        ifconfig ra0 down
-        ifconfig ra8 down
+        ip link set ra0 down
+        ip link set ra8 down
         rmmod /lib/modules/wifi/arris_wps_gpio_handler.ko
         killall -SIGTERM mtk_rpc_wlan_config_server
     else

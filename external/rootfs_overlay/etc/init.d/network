@@ -16,11 +16,11 @@ start_function() {
     # An address may have already been obtained if 'ip=...' was specified in
     # the kernel load command.
     debug_print "DHCP setup if necessary"
-    ETH0_INFO=`ifconfig eth0`
+    ETH0_INFO=`ip addr show eth0`
     debug_print "eth0 info: $ETH0_INFO"
     if [ $? -eq 0 ]; then
         # eth0 is a valid device; check if an address is needed
-        echo "$ETH0_INFO" | grep -q "inet addr"
+        echo "$ETH0_INFO" | grep -q "inet "
         if [ $? -eq 1 ]; then
             # No 'inet addr' section found; request using DHCP
 	    dhclient eth0
@@ -32,7 +32,7 @@ start_function() {
     route add -net 224.0.0.0 netmask 240.0.0.0 eth0
 
     # Set up the local loopback device
-    ifconfig lo 127.0.0.1
+    ip addr add 127.0.0.1/255.0.0.0 dev lo
 
     # Set the default kernel buffering for UDP multicast to 8M buffers
     # (this means that applications can be late to read a socket for up to 8M).

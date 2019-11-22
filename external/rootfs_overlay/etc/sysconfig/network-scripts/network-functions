@@ -228,13 +228,13 @@ set_hostname ()
 check_device_down ()
 {
     if echo $1 | grep -q ':' ; then
-     if LC_ALL=C ifconfig -a 2>/dev/null | grep -q $1 ; then
+     if LC_ALL=C ip -o link ls 2>/dev/null | grep -q $1 ; then
 	  return 1
      else
 	  return 0
      fi
     else 
-     if LC_ALL=C ip -o link ls dev $1 2>/dev/null | grep -q ",UP" ; then
+     if LC_ALL=C ip -o addr ls 2>/dev/null | grep -q $1 ; then
 	return 1
      else
 	return 0
@@ -262,7 +262,7 @@ check_ethtool ()
 check_link_down ()
 {
     if [ -x /sbin/mii-tool -o -x /sbin/ethtool ]; then
-        if ! LC_ALL=C ip link show dev $1 2>/dev/null| grep -q UP ; then
+        if ! LC_ALL=C ip addr show dev $1 2>/dev/null| grep -q UP ; then
 	   ip link set dev $1 up >/dev/null 2>&1
 	   timeout=0
 	   while [ $timeout -le 10 ]; do

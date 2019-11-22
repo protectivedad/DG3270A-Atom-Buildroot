@@ -76,13 +76,13 @@ start_function() {
 	# If necessary, activate eth0 IF
 	# An address may have already been obtained if 'ip=...' was specified in
 	# the kernel load command.
-	RPC_ETH0_INFO=`ifconfig eth0`
+	RPC_ETH0_INFO=`ip addr show eth0`
 	if [ $? -eq 0 ]; then
 		# eth0 is a valid device; check if an address is needed
-		echo "$RPC_ETH0_INFO" | grep -q "inet addr"
+		echo "$RPC_ETH0_INFO" | grep -q "inet"
 		if [ $? -eq 1 ]; then
 			# No 'inet addr' section found (no ipv4 addr is set); activate eth0 IF
-			ifconfig eth0 0.0.0.0 up
+			ip link set eth0 up
 		fi
 	fi
 	########################
