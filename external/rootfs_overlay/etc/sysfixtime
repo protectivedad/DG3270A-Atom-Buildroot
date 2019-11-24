@@ -3,7 +3,7 @@
 . /etc/profile
 
 systohc() {
-	/sbin/hwclock --systohc --localtime
+	/sbin/hwclock -w
 }
 
 case "$1" in

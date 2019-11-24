@@ -72,37 +72,34 @@ PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 . /etc/init.d/init_utilities
 
 start_function() {
-    # Install arris event module
-    try_command insmod /lib/modules/arris_event.ko
+	# Install arris event module
+	try_command insmod /lib/modules/arris_event.ko
 
-    # Start eventd
-    /usr/sbin/eventd -d
-    
-    # Start klogd and syslogd
-    /sbin/klogd
-    killall -SIGTERM syslogd 
-    /sbin/syslogd -S -s 14
+	# Start eventd
+	/usr/sbin/eventd -d
+
 }
 
 stop_function() {
-    # Remove arris event module
-    rmmod arris_event
+	# Kill eventd
+	killall -SIGTERM eventd
 
-    # Kill eventd
-    killall -SIGTERM eventd
+	# Remove arris event module
+	rmmod arris_event
 }
 
 case $1 in
-    "start")
-        start_function
-        ;;
-    "stop")
-        stop_function
-        ;;
-    "restart")
-        stop_function
-        start_function
-        ;;
-    *)
-        echo "Usage: $0 {start|stop|restart}"
+	"start")
+		start_function
+	;;
+	"stop")
+		stop_function
+	;;
+	"restart")
+		stop_function
+		start_function
+	;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
 esac
+

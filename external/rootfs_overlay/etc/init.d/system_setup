@@ -36,11 +36,11 @@ start_function() {
 	mkdir -p proc tmp sys var dev
 	mount -a
 	mount_if_not_mounted "/dev" "tmpfs" "tmpfs" "-o size=2m"
-	mknod /dev/null c 1 3
-	[ ! -d /dev/pts ] && mkdir -p --mode=a+rwx /dev/pts
+	make_dev null null 1 3
+	[ ! -d /dev/pts ] && mkdir -p -m a+rwx /dev/pts
 	mount_if_not_mounted "/dev/pts" "devpts" "devpts"
 
-	mkdir -p --mode=a+rwx /var/log /var/run /var/lock
+	mkdir -p -m a+rwx /var/log /var/run /var/lock
 	touch /var/log/lastlog
 	if [ ! -e /var/log/messages ]; then
 		ln -s /tmp/messages /var/log/messages
@@ -49,8 +49,10 @@ start_function() {
 	# Create a mount point in /tmp
 	mkdir -p /tmp/mnt
 
-	# Start syslog
-	syslogd -O /tmp/messages
+	# Start klogd and syslogd
+	killall -SIGTERM syslogd klogd
+	/sbin/klogd
+	/sbin/syslogd -S -s 14
 
 	# Setup the RTC
 	make_dev rtc rtc 10 135
@@ -59,6 +61,7 @@ start_function() {
 stop_function() {
 	rm -f /dev/rtc
 	killall syslogd
+	killall klogd
 	umount /var
 	umount /tmp
 	umount /sys
