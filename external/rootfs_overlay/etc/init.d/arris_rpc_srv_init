@@ -69,50 +69,14 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
-
-APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
+. /etc/ce_mailbox
 
 start_function() {
+	# Detach from console. So it can't freeze it later.
+	exec >/dev/null 2>/dev/null </dev/null
 
-    #---------------------------------------------
-    #ONE TIME UPDATE OF CELENO'S WIFI 5.0GHz EFUSE
-    #---------------------------------------------
-    if [ `cat /proc/bus/pci/devices | grep -c 18143592` -eq 2 ]; then
-       #Temporarily set env because Celeno script looks for them
-       export clr_cfg_dir=/tmp
-       export clr_install_dir=/etc/Wireless/CLR260/
-       export clr_eeprom_dir=/nvram
-       if [ `grep -c "ARRIS host machine" $clr_install_dir/env.sh` -eq 1 ]; then
-          if [ `cat /sys/bus/pci/devices/0000\:02\:00.0/device` =  "0x3592" ]; then
-             echo 1 > /sys/bus/pci/devices/0000\:03\:00.0/remove
-             sleep 1
-
-             #Kill the rpc server to prevent driver from being loaded by the ARM
-             killall clr_rpc_wlan_config_server 
-
-             if [ ! -f $clr_cfg_dir/CLR260.dat ]; then
-                cp $clr_install_dir/CLR260_default $clr_cfg_dir/CLR260.dat                                
-             fi
-
-             echo "****** Performing one-time update of WiFi 5GHz PCI device id in efuse ******"
-             $clr_install_dir/host_insmod.sh 5g 0 0x3592
-             if [ `ifconfig -a | grep HWaddr | grep -c ce00` -eq 1 ]; then
-                ifconfig ce00 up
-                sleep 5
-                iwpriv ce00 e2fuse a=3501
-                echo "****** WiFi 5GHz PCI device id updated to 0x3501 ******"
-                echo "****** Device must be rebooted ... ******"
-             fi
-         fi
-      fi
-  fi
-  #---------------------------------------------
-  #ONE TIME UPDATE OF CELENO'S WIFI 5.0GHz EFUSE
-  #---------------------------------------------
-
-
-    debug_print "Trying to start arris_wlan_rpc_server"
-    arris_wlan_rpc_server $APP_RPC_IP &
+	debug_print "Trying to start arris_wlan_rpc_server"
+	arris_wlan_rpc_server $APP_RPC_IP &
 }
 
 stop_function() {
@@ -121,16 +85,16 @@ stop_function() {
 }
 
 case $1 in
-    "start")
-    start_function
-    ;;
-    "stop")
-    stop_function
-    ;;
-    "restart")
-    stop_function
-    start_function
-    ;;
-    *)
-    echo "Usage: $0 {start|stop|restart}"
+	"start")
+		start_function
+	;;
+	"stop")
+		stop_function
+	;;
+	"restart")
+		stop_function
+		start_function
+	;;
+	*)
+	echo "Usage: $0 {start|stop|restart}"
 esac

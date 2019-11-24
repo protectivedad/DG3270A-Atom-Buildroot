@@ -69,8 +69,7 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/etc/ath
 
 . /etc/init.d/init_utilities
-
-APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
+. /etc/ce_mailbox
 
 WIFI_VENDOR=NONE
 if [ $(cat /proc/bus/pci/devices | cut -f2 -d$'\t' | grep -c ^1814) -ne 0 ]; then

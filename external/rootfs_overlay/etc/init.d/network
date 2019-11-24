@@ -1,50 +1,52 @@
 #!/bin/sh
-
 # Script name can be the called name, or something more meaningful.
 SCRIPTNAME=network
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin
 
 . /etc/init.d/init_utilities
 . /etc/sysconfig/network
+. /etc/ce_mailbox
 
 start_function() {
-    # If /etc/resolv.conf is not writable we'll use this.
-    touch /tmp/resolv.conf
+	# If /etc/resolv.conf is not writable we'll use this.
+	touch /tmp/resolv.conf
 
-    ########################
-    # If necessary, retrieve use DHCP for eth0
-    # An address may have already been obtained if 'ip=...' was specified in
-    # the kernel load command.
-    debug_print "DHCP setup if necessary"
-    ETH0_INFO=`ip addr show eth0`
-    debug_print "eth0 info: $ETH0_INFO"
-    if [ $? -eq 0 ]; then
-        # eth0 is a valid device; check if an address is needed
-        echo "$ETH0_INFO" | grep -q "inet "
-        if [ $? -eq 1 ]; then
-            # No 'inet addr' section found; request using DHCP
-	    dhclient eth0
-        fi
-    fi
-    ########################
+	# Set up the local loopback device
+	if [[ -z "$(ip addr show dev lo 2>/dev/null | grep 'inet ')" ]]; then
+		ip addr add 127.0.0.1/255.0.0.0 dev lo
+	fi
 
-    # Add an entry to the routing table
-    route add -net 224.0.0.0 netmask 240.0.0.0 eth0
+	debug_print "Trying to setup eth0 for RPC IF..."
+	########################
+	# If necessary, activate eth0 IF
+	# If necessary, retrieve use DHCP for eth0
+	# An address may have already been obtained if 'ip=...' was specified in
+	# the kernel load command.
+	ETH0_INFO=`ip addr show eth0`
+	debug_print "eth0 info: $ETH0_INFO"
+	if [ $? -eq 0 ]; then
+		# eth0 is a valid device; check if an address is needed
+		echo "$ETH0_INFO" | grep -q "inet "
+		if [ $? -eq 1 ]; then
+			# No 'inet addr' section found (no ipv4 addr is set); activate eth0 IF
+			ip link set eth0 up
+			udhcpc -i eth0 -b
+		fi
+	fi
+	########################
+	debug_print "Trying to setup RPC IF..."
+	vconfig add eth0 4093
+	ip addr add $APP_RPC_IP/255.255.255.0 broadcast 192.168.254.255 dev eth0.4093
+	ip link set eth0.4093 up
+	
+	# Wait for NP to be ready.
+	until ping -c1 ${NP_RPC_IP} >/dev/null 2>&1; do :; done
 
-    # Set up the local loopback device
-    ip addr add 127.0.0.1/255.0.0.0 dev lo
-
-    # Set the default kernel buffering for UDP multicast to 8M buffers
-    # (this means that applications can be late to read a socket for up to 8M).
-    # We'll want to reconsider this for later, but this currently provides us a
-    # cushion for development testing.
-    #echo 8388608 > /proc/sys/net/core/rmem_default
-    #echo 8388608 > /proc/sys/net/core/rmem_max
 }
 
 stop_function() {
-    # Remove our entry from the routing table
-    route del -net 224.0.0.0 netmask 240.0.0.0 eth0
+	# Remove our entry from the routing table
+	ifdown -a
 }
 
 case $1 in

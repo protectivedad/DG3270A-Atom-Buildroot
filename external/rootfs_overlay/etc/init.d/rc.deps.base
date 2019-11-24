@@ -1,13 +1,11 @@
 kernel
-network rpc_ifconfig_init
 nvram
-portmap_init network nvram rpc_ifconfig_init
-rpc_ifconfig_init nvram
+network nvram
+dropbear network
+portmap_init network
 rpc_management_srv_init nvram portmap_init
 arris_event_init network
-dropbear network nvram
-wifi
 arris_rpc_srv_init portmap_init
 arris_wlan_rpc_init portmap_init
-rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init
+rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init arris_event_init
 

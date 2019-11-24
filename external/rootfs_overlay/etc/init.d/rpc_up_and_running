@@ -69,7 +69,7 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
-NP_RPC_IP=`cat /proc/ce_mailbox/npcpu_ip`
+. /etc/ce_mailbox
 RPC_CLIENT_BIN="/usr/sbin/rpc_management_client"
 
 start_function() {
@@ -82,6 +82,13 @@ start_function() {
                              try_command $RPC_CLIENT_BIN $NP_RPC_IP -UP_AND_RUNNING
                     fi
         fi
+
+	# Look for a a bridge to have been created and assigned an address.
+	# Then reassign using DHCP.
+	while [[ -z "$(ip addr show dev br0 2>/dev/null | grep br0:0)" ]]; do
+		sleep 1
+	done
+	udhcpc -i br0:0 -S -F $(hostname)
 }
 
 stop_function() {

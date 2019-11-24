@@ -69,8 +69,7 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
-APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
-NP_RPC_IP=`cat /proc/ce_mailbox/npcpu_ip`
+. /etc/ce_mailbox
 
 start_function() {
 	debug_print "Trying to start rpc_management_server"
