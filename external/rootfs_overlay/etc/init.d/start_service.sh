@@ -22,7 +22,7 @@ if [ -f /etc/rc3.d/$THIS ]; then
         shift
         for dep in $@ ; do
             # wait for dependencies
-            /bin/init_man --name $NAME -W $dep
+            /bin/init_man --timeout 90 --warn 30 --name $NAME -W $dep
             if [ ! $? -eq 0 ]; then
                 echo "************************************************************************"
                 echo " ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR"

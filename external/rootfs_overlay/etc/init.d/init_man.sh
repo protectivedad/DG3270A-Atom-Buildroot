@@ -40,7 +40,7 @@ fi
 timeout=""
 if [ "$mode" == "start" ]; then
     # timeout after 90 sec for each script
-    timeout="--timeout 90"
+    timeout="--timeout 90 --warn 30"
 elif [ "$mode" == "stop" ]; then
     # timeout after 60 sec total
     timeout="--total"

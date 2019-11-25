@@ -8,4 +8,5 @@ arris_event_init network
 arris_rpc_srv_init portmap_init
 arris_wlan_rpc_init portmap_init
 rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init arris_event_init
+openvpn rpc_up_and_running
 
