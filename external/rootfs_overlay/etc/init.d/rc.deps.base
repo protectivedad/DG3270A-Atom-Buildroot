@@ -1,8 +1,9 @@
 kernel
+network rpc_ifconfig_init
 nvram
-network nvram
 dropbear network
 portmap_init network
+rpc_ifconfig_init nvram
 rpc_management_srv_init nvram portmap_init
 arris_event_init network
 arris_rpc_srv_init portmap_init

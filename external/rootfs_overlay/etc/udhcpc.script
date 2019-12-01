@@ -77,7 +77,7 @@ case "$1" in
 			killall ntpd
 			/usr/sbin/ntpd -N -p $ntpsrv -S /etc/sysfixtime
 		fi
-		;;:
+		;;
 esac
 
 HOOK_DIR="$0.d"

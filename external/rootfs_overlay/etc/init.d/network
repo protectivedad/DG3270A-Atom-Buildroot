@@ -1,15 +1,16 @@
 #!/bin/sh
+
 # Script name can be the called name, or something more meaningful.
 SCRIPTNAME=network
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin
 
 . /etc/init.d/init_utilities
 . /etc/sysconfig/network
-. /etc/ce_mailbox
+APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
 
 start_function() {
-	# If /etc/resolv.conf is not writable we'll use this.
-	touch /tmp/resolv.conf
+    # If /etc/resolv.conf is not writable we'll use this.
+    touch /tmp/resolv.conf
 
 	# Set up the local loopback device
 	if [[ -z "$(ip addr show dev lo 2>/dev/null | grep 'inet ')" ]]; then
@@ -25,8 +26,8 @@ start_function() {
 	ETH0_INFO=`ip addr show eth0`
 	debug_print "eth0 info: $ETH0_INFO"
 	if [ $? -eq 0 ]; then
-		# eth0 is a valid device; check if an address is needed
-		echo "$ETH0_INFO" | grep -q "inet "
+	# eth0 is a valid device; check if an address is needed
+	echo "$ETH0_INFO" | grep -q "inet "
 		if [ $? -eq 1 ]; then
 			# No 'inet addr' section found (no ipv4 addr is set); activate eth0 IF
 			ip link set eth0 up
@@ -34,18 +35,11 @@ start_function() {
 		fi
 	fi
 	########################
-	debug_print "Trying to setup RPC IF..."
-	vconfig add eth0 4093
-	ip addr add $APP_RPC_IP/255.255.255.0 broadcast 192.168.254.255 dev eth0.4093
 	ip link set eth0.4093 up
-	
-	# Wait for NP to be ready.
-	until ping -c1 ${NP_RPC_IP} >/dev/null 2>&1; do :; done
-
 }
 
 stop_function() {
-	# Remove our entry from the routing table
+    # Remove our entry from the routing table
 	ifdown -a
 }
 

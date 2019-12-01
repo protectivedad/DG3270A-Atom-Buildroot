@@ -69,7 +69,8 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin
 
 . /etc/init.d/init_utilities
-. /etc/ce_mailbox
+
+APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
 
 start_function() {
 	debug_print "Trying to start rpcbind as portmap on $APP_RPC_IP"

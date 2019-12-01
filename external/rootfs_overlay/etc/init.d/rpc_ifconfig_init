@@ -3,7 +3,7 @@
 #  This file is provided under a dual BSD/GPLv2 license.  When using or 
 #  redistributing this file, you may do so under either license.
 #
-#  GPL LICENSE SUMMARY
+#  GPL LICENSE SUMMARY 
 #
 #  Copyright(c) 2012 Intel Corporation. All rights reserved.
 #
@@ -66,75 +66,40 @@
 
 # Script name can be the called name, or something more meaningful.
 SCRIPTNAME=$0
-PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/etc/ath
+PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
 
-APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
-
-WIFI_VENDOR=NONE
-if [ $(cat /proc/bus/pci/devices | cut -f2 -d$'\t' | grep -c ^1814) -ne 0 ]; then
-    WIFI_VENDOR=CLR #CELENO
-elif [ $(cat /proc/bus/pci/devices | cut -f2 -d$'\t' | grep -c ^14c3) -ne 0 ]; then
-    WIFI_VENDOR=MTK #MEDIATEK
-elif [ $(cat /proc/bus/pci/devices | cut -f2 -d$'\t' | grep -c ^168c) -ne 0 ]; then
-    WIFI_VENDOR=QCA
-fi
-
 start_function() {
-
-    if [ "$WIFI_VENDOR" == "QCA" ]; then
-        debug_print "Found QCA device. Trying to start qca_rpc_wlan_config_server"
-        qca_rpc_wlan_config_server $APP_RPC_IP &
-        ## Added for first time use
-        if [ ! -d /nvram/etc/ath ]; then
-            mkdir -p /nvram/etc/ath
-            touch /tmp/.apcfg
-            cfg -c
-            cp /nvram/etc/ath/.configData /nvram/etc/ath/defaultData
-        fi
-        ## directory needed for QCA wpa security
-        if [ ! -d /nvram/etc/wpa2 ]; then
-            mkdir /nvram/etc/wpa2
-        fi
-
-        # start WPS LED handler
-#        wps_gpio -P start &
-        # Check for wlandbg (script to be executed):
-        if [ -f /nvram/etc/ath/wlandbg ]; then
-            /nvram/etc/ath/wlandbg &
-        fi
-    elif [ "$WIFI_VENDOR" == "CLR" ]; then
-        debug_print "Found CLR device. Trying to start clr_rpc_wlan_config_server"
-        clr_rpc_wlan_config_server $APP_RPC_IP &
-    elif [ "$WIFI_VENDOR" == "MTK" ]; then        
-        debug_print "Found MTK device. Trying to start mtk_rpc_wlan_config_server"        
-        mtk_rpc_wlan_config_server $APP_RPC_IP &
-        # Install the arris wps gpio handler module
-        insmod /lib/modules/wifi/arris_wps_gpio_handler.ko
-    else
-        debug_print "No WIFI devices installed"
-    fi
-
+	debug_print "Trying to setup eth0 for RPC IF..."
+	########################
+	# If necessary, activate eth0 IF
+	# An address may have already been obtained if 'ip=...' was specified in
+	# the kernel load command.
+	RPC_ETH0_INFO=`ip addr show eth0`
+	if [ $? -eq 0 ]; then
+		# eth0 is a valid device; check if an address is needed
+		echo "$RPC_ETH0_INFO" | grep -q "inet"
+		if [ $? -eq 1 ]; then
+			# No 'inet addr' section found (no ipv4 addr is set); activate eth0 IF
+			ip link set eth0 up
+		fi
+	fi
+	########################
+	debug_print "Trying to setup RPC IF..."
+	try_command rpc_ifconfig
 }
 
 stop_function() {
-        # Terminate daemons, remove modules, remove device nodes here
-    if [ "$WIFI_VENDOR" == "QCA" ]; then
-        killall -SIGTERM qca_rpc_wlan_config_server
-#        killall wps_gpio
-    elif [ "$WIFI_VENDOR" == "CLR" ]; then
-        killall -SIGTERM clr_rpc_wlan_config_server
-    elif [ "$WIFI_VENDOR" == "MTK" ]; then
-        ip link set ra0 down
-        ip link set ra8 down
-        rmmod /lib/modules/wifi/arris_wps_gpio_handler.ko
-        killall -SIGTERM mtk_rpc_wlan_config_server
-    else
-       echo ""
-    fi
+    # Terminate daemons, remove modules, remove device nodes here
+    #RPC_IFCONFIG_PID=`ps | grep -v grep | grep "rpc_ifconfig" | awk '{print $1}'`
+    #if [[ "x$RPC_IFCONFIG_PID" == "x" ]]; then 
+    #    echo "rpc_ifconfig not running; cannot kill"
+    #else
+    #    kill $RPC_IFCONFIG_PID
+    #fi
+    echo "rpc_ifconfig not running"
 }
-
 
 case $1 in
     "start")

@@ -69,7 +69,7 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
-. /etc/ce_mailbox
+NP_RPC_IP=`cat /proc/ce_mailbox/npcpu_ip`
 RPC_CLIENT_BIN="/usr/sbin/rpc_management_client"
 
 start_function() {
@@ -89,7 +89,8 @@ start_function() {
 		sleep 1
 	done
 	sleep 2
-	udhcpc -i br0:0 -S -F $(hostname)
+	
+	udhcpc -i br0:0 -S -F $(hostname) -O ntpsrv
 }
 
 stop_function() {

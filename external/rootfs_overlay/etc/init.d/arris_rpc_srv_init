@@ -69,14 +69,15 @@ SCRIPTNAME=$0
 PATH=/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin
 
 . /etc/init.d/init_utilities
-. /etc/ce_mailbox
+
+APP_RPC_IP=`cat /proc/ce_mailbox/appcpu_ip`
 
 start_function() {
 	# Detach from console. So it can't freeze it later.
 	exec >/dev/null 2>/dev/null </dev/null
 
-	debug_print "Trying to start arris_wlan_rpc_server"
-	arris_wlan_rpc_server $APP_RPC_IP &
+    debug_print "Trying to start arris_wlan_rpc_server"
+    arris_wlan_rpc_server $APP_RPC_IP &
 }
 
 stop_function() {
@@ -85,16 +86,16 @@ stop_function() {
 }
 
 case $1 in
-	"start")
-		start_function
-	;;
-	"stop")
-		stop_function
-	;;
-	"restart")
-		stop_function
-		start_function
-	;;
-	*)
-	echo "Usage: $0 {start|stop|restart}"
+    "start")
+    start_function
+    ;;
+    "stop")
+    stop_function
+    ;;
+    "restart")
+    stop_function
+    start_function
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart}"
 esac
