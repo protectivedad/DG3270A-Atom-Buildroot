@@ -5,48 +5,85 @@
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
 
 RESOLV_CONF="/etc/resolv.conf"
-[ -n "$subnet" ] && NETMASK="netmask $subnet"
-
-echo "broadcast address received from DHCP server: $broadcast"
-
-# If we didn't get a broadcast address then ifconfig below will set it to
-# class A broadcast address.  We switch to to class C here.
-# Silent removed from ipcalc call because busybox does not support it
-[ ! -n "$broadcast" ] && broadcast=`/bin/ipcalc --broadcast $ip/24 |cut -d "=" -f 2`
-
-echo "broadcast after running through ipcalc: $broadcast"
-
-# If $broadcast is not empty then set it up to be used by ifconfig
-[ -n "$broadcast" ] && broadcast="broadcast $broadcast"
-echo "broadcast final: $broadcast"
+[ -e $RESOLV_CONF ] || touch $RESOLV_CONF
+[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+[ -n "$ip" ] && IP="$ip"
+[ -n "$subnet" ] && IP=$IP/"$subnet"
 
 case "$1" in
 	deconfig)
-		/sbin/ifconfig $interface 0.0.0.0
+		/sbin/ip addr flush $interface
+		/sbin/ip link set $interface up
+
+		# drop info from this interface
+		# resolv.conf may be a symlink to /tmp/, so take care
+		TMPFILE=$(mktemp)
+		grep -vE "# $interface\$" $RESOLV_CONF > $TMPFILE
+		cat $TMPFILE > $RESOLV_CONF
+		rm -f $TMPFILE
+
+		if [ -x /usr/sbin/avahi-autoipd ]; then
+			/usr/sbin/avahi-autoipd -k $interface
+		fi
+		;;
+
+	leasefail|nak)
+		if [ -x /usr/sbin/avahi-autoipd ]; then
+			/usr/sbin/avahi-autoipd -wD $interface --no-chroot
+		fi
 		;;
 
 	renew|bound)
-		echo "/sbin/ifconfig $interface $ip $broadcast $NETMASK"
-		/sbin/ifconfig $interface $ip $broadcast $NETMASK
+		if [ -x /usr/sbin/avahi-autoipd ]; then
+			/usr/sbin/avahi-autoipd -k $interface
+		fi
+		/sbin/ip link set $interface up
+		/sbin/ip addr add $IP $BROADCAST dev $interface
 
 		if [ -n "$router" ] ; then
 			echo "deleting routers"
-			while ip route del dev $interface 2>/dev/null; do
+			while ip route del default dev $interface 2> /dev/null; do
 				:
 			done
 
 			for i in $router ; do
-				ip route add default via $i dev $interface
+				ip route add default via $i dev $interface src $ip
 			done
 		fi
 
-		echo -n > $RESOLV_CONF
-		[ -n "$domain" ] && echo search $domain >> $RESOLV_CONF
+		# drop info from this interface
+		# resolv.conf may be a symlink to /tmp/, so take care
+		TMPFILE=$(mktemp)
+		grep -vE "# $interface\$" $RESOLV_CONF > $TMPFILE
+		cat $TMPFILE > $RESOLV_CONF
+		rm -f $TMPFILE
+
+		# prefer rfc3397 domain search list (option 119) if available
+		if [ -n "$search" ]; then
+			search_list=$search
+		elif [ -n "$domain" ]; then
+			search_list=$domain
+		fi
+
+		[ -n "$search_list" ] &&
+			echo "search $search_list # $interface" >> $RESOLV_CONF
+
 		for i in $dns ; do
 			echo adding dns $i
-			echo nameserver $i >> $RESOLV_CONF
+			echo "nameserver $i # $interface" >> $RESOLV_CONF
 		done
-		;;
+
+		if [ -n "$ntpsrv" ]; then
+			killall ntpd
+			/usr/sbin/ntpd -N -p $ntpsrv -S /etc/sysfixtime
+		fi
+		;;:
 esac
+
+HOOK_DIR="$0.d"
+for hook in "${HOOK_DIR}/"*; do
+    [ -f "${hook}" -a -x "${hook}" ] || continue
+    "${hook}" "${@}"
+done
 
 exit 0

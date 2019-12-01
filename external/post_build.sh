@@ -7,6 +7,9 @@ cd ${ROOTFS}
 # Remove readline "old" files
 find usr/lib -name '*.old' | xargs -r rm
 
+# Remove start scripts
+find etc/init.d -name 'S*' | xargs -r rm
+
 rm_links='lib32 usr/lib32'
 # Remove unneeded links.
 for link in ${rm_links}; do
