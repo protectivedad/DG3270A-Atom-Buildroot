@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 #
 # Original version by Robert Leslie
 # <rob@mars.org>, edited by iwj and cs
@@ -10,16 +10,42 @@ test $DEBIAN_SCRIPT_DEBUG && set -v -x
 CONFIG_DIR=/etc/openvpn
 test -d $CONFIG_DIR || exit 0
 
+BRIDGE_IF="br0"
+TAP_IF=""
+NAMESERVER_IP=$(cat /etc/resolv.conf |grep -m1 -i '^nameserver'|cut -d ' ' -f2)
+
 start_vpn () {
-  /usr/sbin/openvpn --daemon --writepid /var/run/openvpn.$NAME.pid \
-          --config $CONFIG_DIR/$NAME.conf --cd $CONFIG_DIR --script-security 2 \
-          --up "/etc/sysconfig/network-scripts/iftun up" \
-          --down "/etc/sysconfig/network-scripts/iftun down" || printf " FAILED->"
-  printf " $NAME"
+
+	TAP_IF=$(openvpn --mktun --dev tap | grep -o ' tap.* ' | xargs)
+	if [ -n "$TAP_IF" ]; then
+		ip link set dev $TAP_IF up
+		brctl addif $BRIDGE_IF $TAP_IF
+		/usr/sbin/openvpn --daemon --writepid /var/run/openvpn.$NAME.pid --dev $TAP_IF \
+			--config $CONFIG_DIR/$NAME.conf --cd $CONFIG_DIR --script-security 2 \
+			--push "dhcp-option DNS $NAMESERVER_IP" || printf " FAILED->"
+	else
+		printf " FAILED->"
+	fi
+
+	printf " $NAME"
+
 }
+
 stop_vpn () {
-  kill `cat $PIDFILE` || true
-  rm $PIDFILE
+
+	TAP_IF=$(cat "/proc/$(cat /var/run/openvpn.$NAME.pid)/cmdline" | xargs -0 -n2 | grep "\-\-dev"|cut -f2 -d" ")
+
+	kill `cat $PIDFILE` || true
+	rm $PIDFILE
+
+	if [ -n "$TAP_IF" ]; then
+		brctl delif $BRIDGE_IF $TAP_IF
+		ip link set dev $TAP_IF down
+		openvpn --rmtun --dev $TAP_IF || printf " FAILED->"
+	fi
+	
+	printf " $NAME"
+
 }
 
 case "$1" in
@@ -64,7 +90,6 @@ stop)
       NAME=`echo $PIDFILE | cut -c18-`
       NAME=${NAME%%.pid}
       stop_vpn
-      printf " $NAME"
     else
       printf " No such VPN: $2"
     fi
@@ -106,4 +131,3 @@ esac
 
 exit 0
 
-# vim:set ai et sts=2 sw=2 tw=0:

@@ -6,8 +6,7 @@ img_dir=/tmp
 source=${img_dir}/newsquash.img
 md5=${img_dir}/newsquash.md5
 
-cmdline=`cat /proc/cmdline`
-eval ${cmdline}
+eval $(cat /proc/cmdline | tr ' ' '\n' | egrep 'root=|DONT_FLASH=')
 
 partition_0=/dev/mmcblk0p12
 partition_1=/dev/mmcblk0p13
