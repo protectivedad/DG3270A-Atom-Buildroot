@@ -88,9 +88,7 @@ start_function() {
 	while [[ -z "$(ip addr show dev br0 2>/dev/null | grep br0:0)" ]]; do
 		sleep 1
 	done
-	sleep 2
-	
-	udhcpc -i br0:0 -S -F $(hostname) -O ntpsrv
+	udhcpc -i br0 -S -F $(hostname) -O ntpsrv
 }
 
 stop_function() {

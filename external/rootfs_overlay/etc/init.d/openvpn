@@ -54,10 +54,6 @@ printf "Starting openvpn:"
 
   # Load TUN/TAP modules.
   [ ! -c /dev/net/tun ] && insmod /lib/modules/tun.ko
-  # Wait for an outside route.
-  while [[ -z "$(route | grep default)" ]]; do
-    sleep 1
-  done
   if test -z $2 ; then
     for CONFIG in `cd $CONFIG_DIR; ls *.conf 2> /dev/null`; do
       NAME=${CONFIG%%.conf}
