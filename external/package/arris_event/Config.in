@@ -1,0 +1,11 @@
+config BR2_PACKAGE_ARRIS_EVENT
+	bool "Arris Event"
+	default n
+	help
+	  Event daemon and kernel module.
+
+	  Files tagged:
+	  find -name '*event*' ! -name '*lib*'
+	  
+	  Most people should answer N.
+

@@ -5,7 +5,6 @@ dropbear network
 portmap_init network
 rpc_ifconfig_init nvram
 rpc_management_srv_init nvram portmap_init
-arris_event_init network
 arris_rpc_srv_init portmap_init
 arris_wlan_rpc_init portmap_init
 rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init arris_event_init
