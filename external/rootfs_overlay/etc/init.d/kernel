@@ -31,36 +31,44 @@ PATH=/usr/local/bin:/usr/bin:/bin:/sbin
 
 start_function() {
 
-    # set overcommitment mode 2
-    echo "2" >/proc/sys/vm/overcommit_memory
-    # set overcommitment ratio 100% - no overcommitment
-    echo "100" >/proc/sys/vm/overcommit_ratio
+	# set overcommitment mode 2
+	echo "2" >/proc/sys/vm/overcommit_memory
+	# set overcommitment ratio 100% - no overcommitment
+	echo "100" >/proc/sys/vm/overcommit_ratio
+	# Set rp_filter to strict
+	# The 'all' setting doesn't seem to do anything, so we need
+	# to manually set the eth0 which is available before we get
+	# here and isn't set properly by the 'all'
+	echo "1" >/proc/sys/net/ipv4/conf/all/rp_filter
+	echo "1" >/proc/sys/net/ipv4/conf/default/rp_filter
+	echo "1" >/proc/sys/net/ipv4/conf/eth0/rp_filter
 
-    # mknod for SATA CDROM devices
-    rm -f /dev/scd0 /dev/scd1
-    try_command mknod /dev/scd0 b 11 0
-    try_command mknod /dev/scd1 b 11 1
+
+	# mknod for SATA CDROM devices
+	rm -f /dev/scd0 /dev/scd1
+	try_command mknod /dev/scd0 b 11 0
+	try_command mknod /dev/scd1 b 11 1
 
 }
 
 stop_function() {
 
-    # remove SATA CDROM dev nodes
-    rm -f /dev/scd0 /dev/scd1
+	# remove SATA CDROM dev nodes
+	rm -f /dev/scd0 /dev/scd1
 
 }
 
 case $1 in
-    "start")
-    start_function
-    ;;
-    "stop")
-    stop_function
-    ;;
-    "restart")
-    stop_function
-    start_function
-    ;;
-    *)
-    echo "Usage: $0 {start|stop|restart}"
+	"start")
+		start_function
+	;;
+	"stop")
+		stop_function
+	;;
+	"restart")
+		stop_function
+		start_function
+	;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
 esac

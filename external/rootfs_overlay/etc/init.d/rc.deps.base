@@ -1,6 +1,6 @@
 kernel
 network rpc_ifconfig_init
-nvram
+nvram kernel
 dropbear network
 portmap_init network
 rpc_ifconfig_init nvram
@@ -9,4 +9,3 @@ arris_rpc_srv_init portmap_init
 arris_wlan_rpc_init portmap_init
 rpc_up_and_running rpc_management_srv_init arris_rpc_srv_init arris_wlan_rpc_init arris_event_init
 openvpn rpc_up_and_running
-
